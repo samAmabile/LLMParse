@@ -24,13 +24,13 @@ run with command: py encorporator.py (details below)
 ### Setup: 
 
 1. **Clone Repository:**
-    ``bash 
+    ```bash 
     git clone https://github.com/samAmabile/LLMParse
     cd LLMParse
     ```
 
 2. **Install Requirements:**
-    ``bash
+    ```bash
     pip install -r requirements.txt
     ```
 
