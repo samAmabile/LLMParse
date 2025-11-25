@@ -312,9 +312,6 @@ class AppManager:
             return filename
         if choice == '3':
             API = input("Enter API Key to connect to Gemini: ")
-            #this is my api key for us to test:
-            if API.lower() == 'free':
-                API = "AIzaSyAYsiTJ6lDl1p9Yo6cphQxk_DV2udQfiUE"
             geminichat = GeminiChat(API)
             geminiclient = geminichat.connect_to_gemini(API)
             filename = geminichat.chat_loop(geminiclient)
