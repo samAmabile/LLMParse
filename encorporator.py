@@ -441,7 +441,7 @@ class AppManager:
 
                 with open(filename, 'w') as file:
                     for category, score in scores.items():
-                        file.write(f"{category}: {score}")
+                        file.write(f"\n{category}: {score}")
             
             if choice == '4':
                 print("Lemmas: ")
