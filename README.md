@@ -22,7 +22,7 @@ run with command: py encorporator.py (details below)
 * **Plus:** NLTK, google.genai, openai, glob. See requirements.txt for all imports
 
 ### Setup: 
-
+1. **Clone Repository:**
     ```bash
     git clone https://github.com/samAmabile/LLMParse
     cd LLMParse
