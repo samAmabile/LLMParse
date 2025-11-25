@@ -321,6 +321,7 @@ class AppManager:
             return filename
         if choice == '5':
             return "master_corpus.txt"
+        
     def load_file(self, extension):
         #using regex style pattern matching to search the current directory for any .txt files
             ##**i want to add the ability to search in other places, load files not in current directory
@@ -388,13 +389,14 @@ class AppManager:
             print("2. Lemmatize text")
             print("3. Run Senitment Analysis")
             print("4. Print file as corpus (Lemmas, POS Tagged Tokens, List of Sentences)")
-            print("5. Exit")
+            print("5. Compare to another Corpus")
+            print("6. Exit")
 
             choice = input("Enter your choice: ")
 
             if choice == '1':
                 formatted_fdist = encorporator_a.pretty_print_fdist(tokens)
-                action = input("enter filename to save to .txt file, enter 'back' to return to corpus analysis menu").strip()
+                action = input("enter filename to save to .txt file, enter 'back' to return to corpus analysis menu ").strip()
 
                 if action.lower() == 'back':
                     continue
@@ -410,7 +412,7 @@ class AppManager:
                         print("\n")
                     print(lemma, end=' ')
                 
-                action = input("enter filename to save lemmas to .txt file, enter 'back' to return to corpus analysis menu").strip()
+                action = input("enter filename to save lemmas to .txt file, enter 'back' to return to corpus analysis menu ").strip()
                 
                 if action.lower() == 'back':
                     continue
@@ -460,6 +462,38 @@ class AppManager:
                     print(f"\n{index}::{s}")
 
             if choice == '5':
+                print("COMPARE CORPORA")
+                print("choose from the following options:")
+                print("1. Use the entire brown corpus")
+                print("2. Choose specific subcorpora from the brown corpus")
+                corpus_choice = input("Enter selection: ").strip()
+                brown = nltk.corpus.brown
+                if corpus_choice == '1':
+                    brown_raw = brown.raw()
+                elif corpus_choice == '2':
+                    print("choose from the following options, separated by a space:")
+                    subcorpora = {}
+                    for n, cat in enumerate(brown.categories()):
+                        print(f"{n}: {cat}")
+                        subcorpora[n] = cat
+    
+                    subcorpus_choices = input("Enter selection: ").strip().split()
+                    categories = [subcorpora[int(c)] for c in set(subcorpus_choices)]
+                    brown_raw = brown.raw(categories=categories)
+
+                tagged_br, lemmas_br, tokens_br, sentences_br = encorporator_a.encorporate(brown_raw)
+                tagged, lemmas, tokens, sentences = encorporator_a.encorporate(rawtext)
+
+                print(f"Type to Token ratio brown: {len(set(tokens_br)/len(tokens_br))}")
+                print(f"Type to Token ratio file: {len(set(tokens)/len(tokens))}")
+
+                fdist_br = encorporator_a.get_fdist(tokens_br)
+                fdist = encorporator_a.get_fdist(tokens)
+                
+                # do some other comparisons here
+
+
+            if choice == '6':
                 print("exiting...")
                 return
 
