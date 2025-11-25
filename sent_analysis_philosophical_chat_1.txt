@@ -1,0 +1,1 @@
+neg: 0.035neu: 0.875pos: 0.09compound: 0.9973
