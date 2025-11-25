@@ -1,7 +1,7 @@
 
 # LLMParse
 LLM Language Analysis Tool
-# [LLM PARSE]
+
 ## Overview
 **LLM Parse** is a language analysis and corpus creation tool for LLM language analysis. It captures and parses the language of chats with LLM models for linguistic analysis of words, tokens, lemmas, word frequency, and sentiment, with more to come. 
 
@@ -23,8 +23,7 @@ run with command: py encorporator.py (details below)
 
 ### Setup: 
 
-1. **Clone Repository:**
-    ```bash 
+    ```bash
     git clone https://github.com/samAmabile/LLMParse
     cd LLMParse
     ```
@@ -33,7 +32,6 @@ run with command: py encorporator.py (details below)
     ```bash
     pip install -r requirements.txt
     ```
-
 
 ## Note about API Key
 
