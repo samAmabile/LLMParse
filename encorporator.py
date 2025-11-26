@@ -1,4 +1,6 @@
 import glob 
+import requests
+import json
 from google import genai
 from google.genai import types
 from openai import OpenAI
@@ -18,6 +20,7 @@ nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('vader_lexicon')
+nltk.download('brown')
 
 
 class Encorporator:
@@ -57,7 +60,7 @@ class Encorporator:
         return fdist
     
     #print entire FreqDist:
-    def pretty_print_fdist(self, tokens):
+    def pretty_print_fdist(self, tokens)->str:
         fdist = self.get_fdist(tokens)
         lines = []
         items = fdist.items()
@@ -71,6 +74,13 @@ class Encorporator:
             lines.append(line)
         return "\n".join(lines)
     
+    def pretty_print_sorted_fdist(self, hashmap)->str:
+        lines = []
+        for key, value in hashmap:
+            line = f"{key:<10}: {value:>2}{'|'*value}"
+            lines.append(line)
+        return "\n".join(lines)
+
     #get sentiment analysis (returns a dict of categories and scores):
     def analyze_sentiment(self, rawtext)->dict:
         analyzer = SentimentIntensityAnalyzer()
@@ -276,6 +286,83 @@ class GeminiChat:
         print(f"chat saved to: {filename}")
         return filename
 
+#######################################GEMINI CLOUD CONNECT################################################
+class GeminiChatCloud:
+    def __init__(self, cloud_uri):
+        self.url = cloud_uri
+        self.history = []
+    def chat_loop(self):
+        if not self.url:
+            print("error: could not connect to cloud api")
+            return
+        
+        gemini_model = "gemini-2.5-flash"
+        
+        print("\nConnected to Gemini-2.5-flash")
+        print("\nType 'Exit' to terminate chat and save to file")
+
+        while True:
+            prompt = input("\nYou: ").strip()
+            if prompt == "Exit":
+                break
+            
+            try:
+                payload = {"prompt": prompt}
+
+                response = requests.post(
+                    self.url, 
+                    headers={"Content-Type": "application/json"},
+                    data=json.dumps(payload),
+                    timeout=60
+                )
+
+                response.raise_for_status()
+
+                response_data = response.json()
+                gemini_reply = response_data.get('response', 'Error: Proxy returned invalid format.')
+
+                print(f"\nGemini: {gemini_reply}")
+
+                self.history.append({"role": "user", "content": prompt})
+                self.history.append({"role": "assistant", "content": gemini_reply})
+            
+            except requests.exceptions.HTTPError as errh:
+                print(f"HTTP Error: {errh}")
+                print(f"Proxy Response is: {response.text}")
+                break
+            except requests.exceptions.ConnectionError as errc:
+                print(f"Connection Error: {errc}")
+                break
+            except requests.exceptions.Timeout as errt:
+                print(f"Error, timeout: {errt}")
+                break
+            except requests.exceptions.RequestException as err:
+                print(f"Unknown Error Happened: {err}")
+                break
+            except json.JSONDecodeError:
+                print(f"could not decode content of JSON response from the proxy. Response was: {response.text}")
+                break
+            except Exception as e:
+                print("API connection timed out: {e}")
+                break
+        
+        if self.history:
+            chatname = input("\nEnter a filename to save chat: ")
+            filename = chatname+".txt" if not chatname.endswith(".txt") else chatname
+
+            with open(filename, 'w') as file, open("master_corpus.txt", 'a') as master:
+                for message in self.history:
+                    role = message['role'].capitalize()
+                    content = message['content']
+                    file.write(f"[{role}]: {content}\n---\n")
+                    master.write(f"[{role}]: {content}\n---\n")
+                master.write("\n****END OF CHAT****\n")
+        else:
+            print("No content to save")
+            return None    
+        print(f"chat saved to: {filename}")
+        return filename
+
 #############################################APP MANAGER CLASS#########################################################
 ###############################brings together all other classes with user interface###################################
 
@@ -311,11 +398,20 @@ class AppManager:
             filename = gptchat.chat_loop(gptclient)
             return filename
         if choice == '3':
-            API = input("Enter API Key to connect to Gemini: ")
-            geminichat = GeminiChat(API)
-            geminiclient = geminichat.connect_to_gemini(API)
-            filename = geminichat.chat_loop(geminiclient)
-            return filename
+            print("Enter [1] to use API key")
+            print("Enter [2] to connect via Cloud URL")
+            connection = input("Enter your choice: ")
+            if connection == '1':
+                API = input("Enter API Key to connect to Gemini: ")
+                geminichat = GeminiChat(API)
+                geminiclient = geminichat.connect_to_gemini(API)
+                filename = geminichat.chat_loop(geminiclient)
+                return filename
+            if connection == '2':
+                uri = "https://us-central1-parsellm.cloudfunctions.net/gemini-proxy"
+                geminichatcloud = GeminiChatCloud(uri)
+                filename = geminichatcloud.chat_loop()
+                return filename
         if choice == '4':
             filename = self.load_file("txt")
             return filename
@@ -388,7 +484,8 @@ class AppManager:
             print("2. Lemmatize text")
             print("3. Run Senitment Analysis")
             print("4. Print file as corpus (Lemmas, POS Tagged Tokens, List of Sentences)")
-            print("5. Exit")
+            print("5. Compare to another corpus")
+            print("6. Exit")
 
             choice = input("Enter your choice: ")
 
@@ -403,7 +500,7 @@ class AppManager:
                 with open(filename, 'w') as file:
                     file.write(formatted_fdist)
             
-            if choice == '2':
+            elif choice == '2':
                 print("Lemmatized tokens :")
                 for index, lemma in enumerate(lemmas):
                     if (index % 10 == 0):
@@ -423,7 +520,7 @@ class AppManager:
                             file.write("\n")
                         file.write(lemma)
             
-            if choice == '3':
+            elif choice == '3':
                 print("Sentiment Analysis")
                 scores = encorporator_a.analyze_sentiment(rawtext)
                 for category, score in scores.items():
@@ -439,8 +536,8 @@ class AppManager:
                 with open(filename, 'w') as file:
                     for category, score in scores.items():
                         file.write(f"\n{category}: {score}")
-            
-            if choice == '4':
+
+            elif choice == '4':
                 print("Lemmas: ")
                 for index, lemma in enumerate(lemmas):
                     if (index % 10 == 0):
@@ -459,10 +556,142 @@ class AppManager:
                 for index, s in enumerate(sentences):
                     print(f"\n{index}::{s}")
 
-            if choice == '5':
+            elif choice == '5':
+                print("COMPARE CORPORA")
+                print("choose from the following options:")
+                while True:
+                    print("1. Use the entire brown corpus")
+                    print("2. Choose specific subcorpora from the brown corpus")
+                    corpus_choice = input("Enter selection: ").strip()
+                    brown = nltk.corpus.brown
+                    if corpus_choice == '1':
+                        print("Using sample of 10,0000 tokens from Brown")
+                        brown_words = brown.words()
+                        sampled = brown_words[:10000]
+                        brown_raw = " ".join(sampled)
+                        break
+                    elif corpus_choice == '2':
+                        print("choose from the following options, separated by a space:")
+                        subcorpora = {}
+                        for n, cat in enumerate(brown.categories()):
+                            print(f"{n}: {cat}")
+                            subcorpora[n] = cat
+        
+                        subcorpus_choices = input("Enter selection: ").strip().split()
+                        categories = [subcorpora[int(c)] for c in set(subcorpus_choices)]
+                        brown_raw = brown.raw(categories=categories)
+                        break
+                    else:
+                        print("invalid input, enter '1' or '2':")
+                        continue
+                if brown_raw is None:
+                    continue
+                tagged_br, lemmas_br, tokens_br, sentences_br = encorporator_a.encorporate(brown_raw)
+                tagged, lemmas, tokens, sentences = encorporator_a.encorporate(rawtext)
+                len_set_br = len(set(tokens_br))
+                len_br = len(tokens_br)
+                len_set_cur = len(set(tokens))
+                len_cur = len(tokens)
+                ttr_br = len_set_br / len_br
+                ttr_cur = len_set_cur / len_cur
+                print(f"Type to Token ratio brown: {ttr_br}")
+                print(f"Type to Token ratio file: {ttr_cur}")
+
+                ################compare fdists:##############
+                fdist_br = encorporator_a.get_fdist(tokens_br)
+                sorted_fdist_br = sorted(fdist_br.items(), key=lambda item: item[1], reverse=True)
+
+                fdist = encorporator_a.get_fdist(tokens)
+                sorted_fdist = sorted(fdist.items(), key=lambda item: item[1], reverse=True)
+
+
+                print("\n--------------------------------------------------------------")
+                print()
+                print("Brown Frequency Distribution: ")
+                plot_br = encorporator_a.pretty_print_sorted_fdist(sorted_fdist_br)
+                print(f"\n{plot_br}")
+                print("\n--------------------------------------------------------------")
+                print("Current Corpus Frequency Distribution: ")
+                plot_cur = encorporator_a.pretty_print_sorted_fdist(sorted_fdist)
+                print(f"\n{plot_cur}")
+                # do some other comparisons here
+                ################compare tag frequency########################
+                tag_count_br = {}
+                for word, tag in tagged_br:
+                    if tag in tag_count_br:
+                        tag_count_br[tag] += 1
+                    else:
+                        tag_count_br[tag] = 1
+                tag_count_cur = {}
+                for word, tag in tagged:
+                    if tag in tag_count_cur:
+                        tag_count_cur[tag] += 1
+                    else:
+                        tag_count_cur[tag] = 1
+                sorted_tags_br = sorted(tag_count_br.items(), key=lambda item: item[1], reverse=True)
+                sorted_tags_cur = sorted(tag_count_cur.items(), key=lambda item: item[1], reverse=True)
+                print("\n----------------------------------------------------------------")
+                print("Brown Part of Speech Tags: ")
+                for tag, count in sorted_tags_br:
+                    print(f"{tag}: {count}")
+                print("------------------------------------------------------------------")
+                print("Current Corpus Part of Speech Tags")
+                for tag, count in sorted_tags_cur:
+                    print(f"{tag}: {count}")
+                ############top lemmas comparison################
+                lemmas_dist_br = encorporator_a.pretty_print_fdist(lemmas_br)
+                lemmas_dist_cur = encorporator_a.pretty_print_fdist(lemmas)
+                print("\n---------------------------------------------------------------")
+                print("Lemma Frequency Brown: ")
+                print(lemmas_dist_br)
+                print("------------------------------------------------------------------")
+                print("Lemmas Frequency Current Corpus")
+                print(lemmas_dist_cur)
+                
+                #for sentences, maybe we need a concordance/kwic or regex search of some kind
+
+                action = input("Enter filename to save comparisons to file, enter 'back' to return to analysis menu: ").strip()
+                if action == 'back':
+                    break
+                comparison_file = action+".txt" if not action.endswith(".txt") else action
+
+                #bunch of strings to just hold all the above stuff for file saving.
+                br_plot = f"Brown FreqDist: {plot_br}"
+                cur_plot = f"{filename} FreqDist: {plot_cur}"
+                formatted_tags_br = "Brown POS Tags: "+"\n".join((f"{tag}: {count}" for tag, count in sorted_tags_br))
+                formatted_tags_cur = f"{filename} POS Tags: "+"\n".join((f"{tag}: {count}" for tag, count in sorted_tags_cur))
+                brown_ttr = f"Type to Token ratio brown: {ttr_br}"
+                cur_ttr = f"Type to Token ratio {filename}: {ttr_cur}"
+                brown_lemmas = f"Brown Lemmas: {lemmas_dist_br}"
+                cur_lemmas = f"{filename} Lemmas: {lemmas_dist_cur}"
+
+                file_output = [
+                    f"{filename} vs Brown Analysis:",
+                    "\n"+"-"*25+"\n",
+                    brown_ttr,
+                    cur_ttr,
+                    "\n"+"-"*25+"\n",
+                    br_plot,
+                    cur_plot,
+                    "\n"+"-"*25+"\n",
+                    formatted_tags_br,
+                    formatted_tags_cur,
+                    "\n"+"-"*25+"\n",
+                    brown_lemmas,
+                    cur_lemmas,
+                    "\n"+"-"*25+"\n"
+                ]
+                with open(comparison_file, 'w') as file:
+                    file.write("\n".join(file_output))
+
+                print(f"Comparison Analysis Saved to: {comparison_file}") 
+                    
+            elif choice in ['6', 'Exit', 'exit']:
                 print("exiting...")
                 return
-
+            else:
+                print("Invalid input, please enter a number from the list, (enter '6' or 'Exit' to exit): ")
+                continue
 ################################MAIN FUNCTION CALL (DUNDER MAIN)###############################################
 # triggers the whole program:       
 if __name__ == "__main__":
