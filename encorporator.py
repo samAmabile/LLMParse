@@ -363,9 +363,10 @@ class GeminiChat:
                         print("API connection timed out: {e}")
                         break
 
-                acc,f1 = self.train_classifier(chat_responses,list(df["answer"]))
+                data_responses = list(df["answer"])[:len(chat_responses)]
+                acc,f1 = self.train_classifier(chat_responses,data_responses)
                 print("\nAbility to differentiate between chat generated responses and text from data: ")
-                print(f"Accuracy: {acc}, F1: {f1}")
+                print(f"Accuracy: {acc}")
 
                 history = chat.get_history()
 
@@ -432,8 +433,6 @@ class AppManager:
                 filename = geminichat.chat_loop()
             elif live_or_generated == '2':
                 filename = geminichat.generate_larger_corpus()
-
-            filename = geminichat.chat_loop()
             return filename
         if choice == '4':
             filename = self.load_file("txt")
