@@ -14,10 +14,11 @@ from nltk.probability import FreqDist
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
 import pandas as pd
 from sklearn.model_selection import train_test_split
+from sklearn.svm import LinearSVC
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, f1_score
+from datasets import load_dataset, concatenate_datasets
 
 
 nltk.download('punkt')
@@ -300,9 +301,14 @@ class GeminiChat:
         train_df, test_df = train_test_split(shuffled_df, test_size=0.2, random_state=42)
 
         model = Pipeline([
-            ("tfidf", TfidfVectorizer()),
-            ("reg", LogisticRegression(max_iter=1000))
-        ])
+            ("tfidf", TfidfVectorizer(
+                max_features=10000,
+                ngram_range=(1,2), # unigrams and bigrams
+                min_df=2
+            )),
+            ("logreg", LinearSVC(
+                max_iter=200,
+            ))])
 
         model.fit(train_df["text"],train_df["label"])
         preds = model.predict(test_df["text"])
@@ -327,28 +333,39 @@ class GeminiChat:
             print("\nConnected to Gemini-2.5-flash")
             print("Generate a larger corpus from one of the following question/answer corpora: ")
             print("1. Hugging Face Natural Questions")
-            print("4. Exit")
+            print("2. MS Marco Dataset")
+            print("3. Exit")
 
             corpus_choice = input("Choose a number to get corpus details ").strip()
 
-            if corpus_choice == '1':
-                df = pd.read_parquet("hf://datasets/sentence-transformers/natural-questions/pair/train-00000-of-00001.parquet")
-            elif corpus_choice == '4':
-                break
-            else:
-                print("Invalid Choice")
+            if corpus_choice == '3':
                 break
 
             while True:
-                print(f"{len(df)} rows of question/answer data")
-                print(f"Questions are human generated and look like: \n{df.iloc[0]["query"]}")
-                print(f"Answers are from wikipedia and look like: \n{".".join(df.iloc[0]["answer"].split('.')[:2])}...") #only first two sentences
+                if corpus_choice == '1': # wiki responses
+                    df = pd.read_parquet("hf://datasets/sentence-transformers/natural-questions/pair/train-00000-of-00001.parquet")
+                    df = df.sample(frac=1).reset_index(drop=True) # shuffle
+                    print("\nNATURAL QUESTIONS DATASET")
+                    print(f"{len(df)} rows of question/answer data (will only use max 500 to make corpus)")
+                    print(f"Questions are human generated and look like: \n{df.iloc[0]["query"]}")
+                    print(f"Answers are from wikipedia and look like: \n{".".join(df.iloc[0]["answer"].split('.')[:2])}...") # only first two sentences
+                elif corpus_choice == '2': # human responses
+                    ds = load_dataset("microsoft/ms_marco", "v1.1")
+                    full_ds = concatenate_datasets([ds["train"],ds["test"],ds["validation"]])
+                    df = full_ds.to_pandas()
+                    df = df.sample(frac=1).reset_index(drop=True) # shuffle
+                    df = df[df["answers"].apply(lambda x: len(x) > 0 and len(x[0].split()) > 3)] # only keep answers with more than 3 words
+                    df["answer"] = df["answers"].apply(lambda x: x[0]) # get first answer, because ms marco gives a list
+                    print("\nMS MARCO DATASET")
+                    print(f"{len(df)} rows of question/answer data (will only use max 500 to make corpus)")
+                    print(f"Questions are human generated and look like: \n{df.iloc[0]["query"]}")
+                    print(f"Answers are human generated and look like: \n{df.iloc[0]["answer"]}")
             
                 continue_button = input("\nType 'back' to go back, or anything else to continue ")
                 if continue_button == 'back':
                     break
 
-                questions = list(df["query"])
+                questions = list(df["query"])[:500] # max 500
                 tag_yes_or_no = input("\nWould you like to append a tag onto all your queries? ie. 'put in an academic tone' or 'explain it like I'm 5' - type 'yes' for yes and anything else for no ")
                 if tag_yes_or_no == 'yes':
                     tag = input("Type your tag here: ")
@@ -364,6 +381,10 @@ class GeminiChat:
                         break
 
                 data_responses = list(df["answer"])[:len(chat_responses)]
+
+                if len(chat_responses) == 0:
+                    return None
+
                 acc,f1 = self.train_classifier(chat_responses,data_responses)
                 print("\nAbility to differentiate between chat generated responses and text from data: ")
                 print(f"Accuracy: {acc}")
@@ -609,7 +630,6 @@ class AppManager:
                 fdist = encorporator_a.get_fdist(tokens)
                 
                 # do some other comparisons here
-
 
             if choice == '6':
                 print("exiting...")
