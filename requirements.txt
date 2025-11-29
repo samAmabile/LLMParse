@@ -1,3 +1,8 @@
+requests
 google-genai
 openai
 nltk
+panda
+scikit-learn
+numpy #required for scikit-learn
+scipy #required for scikit-learn
