@@ -19,6 +19,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.metrics import accuracy_score, f1_score
 from datasets import load_dataset, concatenate_datasets
+import csv
 
 
 nltk.download('punkt')
@@ -238,6 +239,24 @@ class GeminiChat:
             print(f"Error, unable to connect to Gemini: {e}")
             return None
         
+    def write_to_csv(self,history,live,tag):
+        chatname = input("\nEnter a filename to save chat: ")
+        filename = chatname+".csv" if not chatname.endswith(".csv") else chatname
+
+        with open(filename, 'w', newline='') as file, open("master_corpus.csv", 'a') as master:
+            writer = csv.writer(file)
+            writer.writerow(['Role','Content','Live?','Tag?'])
+            master_writer = csv.writer(master)
+            chat_num = list(pd.read_csv('master_corpus.csv')["Chat"])[-1] + 1
+            for message in history:
+                role = message.role.capitalize()
+                content = message.parts[0].text
+                writer.writerow([role, content, live, tag])
+                master_writer.writerow([role, content, live, tag, chat_num])
+            
+        return filename
+
+        
     def chat_loop(self):
         if not self.client:
             print("Not connected to API")
@@ -271,6 +290,14 @@ class GeminiChat:
         history = chat.get_history()
 
         if history:
+            filename = self.write_to_csv(history,1,'')
+        else:
+            print("No content to save")
+            return None
+        return filename
+
+        '''
+        if history:
             chatname = input("\nEnter a filename to save chat: ")
             filename = chatname+".txt" if not chatname.endswith(".txt") else chatname
 
@@ -286,6 +313,7 @@ class GeminiChat:
             return None    
         print(f"chat saved to: {filename}")
         return filename
+        '''
     
     def train_classifier(self, chat_responses, data_responses):
         chat_df = pd.DataFrame({
@@ -370,6 +398,8 @@ class GeminiChat:
                 if tag_yes_or_no == 'yes':
                     tag = input("Type your tag here: ")
                     questions = [q + "? " + tag for q in questions]
+                else:
+                    tag = ''
 
                 chat_responses = []
                 for q in questions:
@@ -392,6 +422,14 @@ class GeminiChat:
                 history = chat.get_history()
 
                 if history:
+                    filename = self.write_to_csv(history,0,tag)
+                else:
+                    print("No content to save")
+                    return None
+                return filename
+
+                '''
+                if history:
                     chatname = input("\nEnter a filename to save chat: ")
                     filename = chatname+".txt" if not chatname.endswith(".txt") else chatname
 
@@ -408,6 +446,7 @@ class GeminiChat:
                 
                 print(f"chat saved to: {filename}")
                 return filename
+                '''
 
 
 #############################################APP MANAGER CLASS#########################################################
@@ -503,7 +542,36 @@ class AppManager:
         #instance of Encorporator object to access those functions:
         encorporator_a = Encorporator()
 
-        #rawtext:
+        #give the user more variability, they could experiment with many different things
+        df = pd.read_csv(filename)
+
+        print("What would you like to look at?")
+        print("1. LLM Rawtext")
+        print("2. Prompts Rawtext")
+        if filename == 'master_corpus.csv':
+            print("3. Live Chat Rawtext")
+            print("4. Generated Chat Rawtext")
+            print("5. Specific Tag")
+            print("6. Specific Chat #")
+        selection = input("Select an option...")
+        
+        if selection == '1':
+            rawtext = '. '.join(list(df[df["Role"]=="Model"]["Content"]))
+        elif selection == '2':
+            rawtext = '. '.join(list(df[df["Role"]=="User"]["Content"])) 
+        elif selection == '3':
+            rawtext = '. '.join(list(df[df["Live?"]==1]["Content"]))
+        elif selection == '4':
+            rawtext = '. '.join(list(df[df["Live?"]==0]["Content"]))
+        elif selection == '5':
+            tag_choice = input("Which tag?")
+            rawtext = '. '.join(list(df[df["Tag"]==tag_choice]["Content"]))
+        elif selection == '6':
+            chat_choice = input("Which chat?")
+            rawtext = '. '.join(list(df[df["Chat"]==int(chat_choice)]["Content"]))
+
+
+        '''
         try:
             with open(filename, 'r') as file:
                 rawtext = file.read()
@@ -511,6 +579,7 @@ class AppManager:
             print(f"could not locate file to load")
         except IOError as e:
             print(f"Error: could not read data from file: {filename}; error: {e}")
+        '''
 
         #basic corpus created from raw text, broken down into its parts:
         corpus = encorporator_a.encorporate(rawtext)
