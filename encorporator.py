@@ -1,4 +1,5 @@
 
+import os
 import nltk
 from nltk.corpus import wordnet
 from nltk.corpus import genesis
@@ -16,6 +17,9 @@ nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('vader_lexicon')
 nltk.download('brown')
+
+#pats to save smaller corpora:
+TESTS_FOLDER = "tests"
 
 class Encorporator:
     #class that holds all the corpora related operations that can be performed on text
@@ -81,9 +85,13 @@ class Encorporator:
         scores = analyzer.polarity_scores(rawtext)
         return scores
     
+    #check for folder, make if needed:
+    def verify_path(self, folder):
+        os.makedirs(folder, exist_ok=True)
+
     #this function is to retroactively parse files with both prompt and response into 
     #   two separate files, also removes [USER] and [MODEL] tags from those files:
-    def parse_chat(self, infilename, promptfile, modelfile):
+    def parse_chat(self, infilename, prompt, model):
 
         prompts = []
         llm_responses = []
@@ -92,6 +100,10 @@ class Encorporator:
 
         is_llm = False
 
+        #verify tests/ path for saving:
+        self.verify_path(TESTS_FOLDER)
+
+        
         with open(infilename, 'r') as infile:
             for line in infile:
                 text = line.strip()
@@ -119,8 +131,11 @@ class Encorporator:
                     prompts.append(prompt)
                 
         #then save each to its own file
-        promptfile = promptfile+".txt" if not promptfile.endswith(".txt") else promptfile
-        modelfile = modelfile+".txt" if not modelfile.endswith(".txt") else modelfile
+        prompt = prompt+".txt" if not prompt.endswith(".txt") else prompt
+        model = model+".txt" if not model.endswith(".txt") else model
+
+        promptfile = os.path.join(TESTS_FOLDER, prompt)
+        modelfile = os.path.join(TESTS_FOLDER, model)
 
         with open(promptfile, 'w') as f1, open("master_prompts.txt", 'a') as promptlog:
             f1.write("\n".join(prompts))
@@ -128,6 +143,8 @@ class Encorporator:
         with open(modelfile, 'w') as f2, open("master_corpus.txt", 'a') as master:
             f2.write("\n".join(llm_responses))
             master.write("\n".join(llm_responses))
+        
+        #returns file paths now:
         return promptfile, modelfile
         
         
@@ -140,7 +157,7 @@ class Encorporator:
         lower_tokens = [w.lower() for w in tokens]
         lemmatizer = WordNetLemmatizer()
         tagged = nltk.pos_tag(lower_tokens)
-        lemmas = [lemmatizer.lemmatize(word, self.get_pos(tag)) for word, tag in tagged]
+        lemmas = [lemmatizer.lemmatize(word.strip(), self.get_pos(tag)) for word, tag in tagged]
         return tagged, lemmas, tokens, sentences
     
     #allows call to encorporate directly on a filename:

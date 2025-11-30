@@ -16,6 +16,9 @@ from sklearn.metrics import accuracy_score, f1_score
 from datasets import load_dataset, concatenate_datasets
 from encorporator import Encorporator
 
+#for storing corpora created from each save:
+TESTS_FOLDER = "tests"
+
 #for use in parsing files to store prompts/llm response separately:
 parser = Encorporator()
 
@@ -37,12 +40,25 @@ class GeminiChat:
         except Exception as e:
             print(f"Error, unable to connect to Gemini: {e}")
             return None
-        
+    
+    #make folders if they do not yet exist:
+    def verify_path(self, folder):
+        os.makedirs(folder, exist_ok=True)
+
+
     def write_to_csv(self,history,live,tag):
+        
         chatname = input("\nEnter a filename to save chat: ")
         filename = chatname+".csv" if not chatname.endswith(".csv") else chatname
 
-        #was crashing with no data so added this since my master csv is empty
+        #added path to keep individual corpora in a subfolder:
+        #masters stay in main folder for now
+        #check for path,else make path:
+        self.verify_path(TESTS_FOLDER)
+
+        #add path to filename "tests/":
+        path = os.path.join(TESTS_FOLDER, filename)
+        #was crashing with no data so added this since my master csv was empty
         #should not affect anything else:
         try:
             chat_num = list(pd.read_csv('master_corpus.csv')["Chat"])[-1] + 1
@@ -50,7 +66,7 @@ class GeminiChat:
             chat_num = 1
         
         #added utf-8 encoding to all file saving b/c some llm content was using weird chars:
-        with open(filename, 'w', newline='', encoding='utf-8') as file, open("master_corpus.csv", 'a', encoding='utf-8') as master:
+        with open(path, 'w', newline='', encoding='utf-8') as file, open("master_corpus.csv", 'a', encoding='utf-8') as master:
             writer = csv.writer(file)
             writer.writerow(['Role','Content','Live?','Tag?'])
             master_writer = csv.writer(master)
@@ -61,8 +77,9 @@ class GeminiChat:
                 content = message.parts[0].text
                 writer.writerow([role, content, live, tag])
                 master_writer.writerow([role, content, live, tag, chat_num])
-            
-        return filename 
+        
+        #returns the path of the file now: tests/filename:
+        return path 
     
     def chat_loop(self):
         if not self.client:
@@ -98,7 +115,13 @@ class GeminiChat:
 
         if history:
             csvname = self.write_to_csv(history,1,'')
-            txtfile = csvname.replace('.csv', '.txt')
+            txtname = csvname.replace('.csv', '.txt')
+
+            #verify/make tests folder:
+            self.verify_path(TESTS_FOLDER)
+
+            #added path "/tests" to txt filename:
+            txtfile = os.path.join(TESTS_FOLDER, txtname)
 
             with open(txtfile, 'w', encoding='utf-8') as file, open("master_chat_log.txt", 'a', encoding='utf-8') as master:
                 for message in history:
@@ -238,7 +261,13 @@ class GeminiChat:
 
                     #keeping both options, leading with csv:
                     csvfile = self.write_to_csv(history,0,tag)
-                    txtname = csvfile.replace('.csv', '.txt')
+                    txtfile = csvfile.replace('.csv', '.txt')
+
+                    #check or make /tests folder:
+                    self.verify_path(TESTS_FOLDER)
+
+                    #path added "/tests/txtfile":
+                    txtname = os.path.join(TESTS_FOLDER, txtfile)
                     
                     #writing to txt (this should be in a separate function):
                     with open(txtname, 'w', encoding='utf-8') as file, open("master_chat_log.txt", 'a', encoding='utf-8') as master:
@@ -278,11 +307,20 @@ class GeminiChatCloud:
         self.url = cloud_uri
         self.history = []
 
+    def verify_path_cloud(self, folder):
+        os.makedirs(folder, exist_ok=True)
+
     #updated write to csv to handle how cloud access parses chats:
     def write_to_csv_cloud(self,live,tag):
         chatname = input("\nEnter a filename to save chat: ")
         filename = chatname+".csv" if not chatname.endswith(".csv") else chatname
+        
+        #verify tests/ path, or make:
+        self.verify_path_cloud(TESTS_FOLDER)
 
+        #add path to filename: 
+        path = os.path.join(TESTS_FOLDER, filename)
+        #verify master_corpus.csv exists before saving:
         if os.path.exists('master_corpus.csv'):
             try:
                 chat_num = list(pd.read_csv('master_corpus.csv')["Chat"])[-1] + 1
@@ -290,7 +328,9 @@ class GeminiChatCloud:
                 chat_num = 1
         else:
             chat_num = 1
-        with open(filename, 'w', newline='', encoding='utf-8') as file, open("master_corpus.csv", 'a', encoding='utf-8') as master:
+
+        #corpus saves to tests/ path, master still in main:
+        with open(path, 'w', newline='', encoding='utf-8') as file, open("master_corpus.csv", 'a', encoding='utf-8') as master:
             writer = csv.writer(file)
             writer.writerow(['Role','Content','Live?','Tag?'])
             master_writer = csv.writer(master)
@@ -301,8 +341,9 @@ class GeminiChatCloud:
                 content = message['content']
                 writer.writerow([role, content, live, tag])
                 master_writer.writerow([role, content, live, tag, chat_num])
-            
-        return filename 
+        
+        #returns full path where file is saved:
+        return path
     
     def chat_loop(self):
         if not self.url:
@@ -363,7 +404,11 @@ class GeminiChatCloud:
             
             #write to csv file:
             csvfile = self.write_to_csv_cloud(1, '')
-            txtfile = csvfile.replace('.csv', '.txt')
+            txtname = csvfile.replace('.csv', '.txt')
+            
+            self.verify_path_cloud(TESTS_FOLDER)
+
+            txtfile = os.path.join(TESTS_FOLDER, txtname)
             
             #writing to txt file:
             with open(txtfile, 'w', encoding='utf-8') as file, open("master_chat_log.txt", 'a', encoding='utf-8') as master:

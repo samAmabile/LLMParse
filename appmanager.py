@@ -11,6 +11,10 @@ from nltk.corpus import brown
 
 nltk.download('brown')
 
+#folders for paths:
+TESTS_FOLDER = "tests"
+ANALYSIS_FOLDER = "analysis"
+
 class AppManager:
     def __init__(self):
         self.main_loop()
@@ -150,8 +154,11 @@ class AppManager:
                 return chosen_file
             else:
                 print("invalid input, please enter just the number of the file to load: ")
-        
     
+    #checks for path, makes folder if path nonexistent:
+    def verify_path(self, folder):
+        os.makedirs(folder, exist_ok=True)
+
     def main_loop(self):
         filenames = self.MainMenu()
         if not filenames:
@@ -245,8 +252,12 @@ class AppManager:
                 if action.lower() == 'back':
                     continue
                 
+                self.verify_path(ANALYSIS_FOLDER)
+
                 filename = action+'.txt' if not action.endswith('.txt') else action
-                with open(filename, 'w', encoding='utf-8') as file:
+                path = os.path.join(ANALYSIS_FOLDER, filename)
+
+                with open(path, 'w', encoding='utf-8') as file:
                     file.write(formatted_fdist)
             
             elif choice == '2':
@@ -260,10 +271,13 @@ class AppManager:
                 
                 if action.lower() == 'back':
                     continue
+                
+                self.verify_path(ANALYSIS_FOLDER)
 
                 filename = action+".txt" if not action.endswith(".txt") else action
+                path = os.path.join(ANALYSIS_FOLDER, filename)
 
-                with open(filename, 'w', encoding='utf-8') as file:
+                with open(path, 'w', encoding='utf-8') as file:
                     for index, lemma in enumerate(lemmas):
                         if index % 10 == 0:
                             file.write("\n")
@@ -279,10 +293,13 @@ class AppManager:
 
                 if action.lower() == 'back':
                     continue
+                
+                self.verify_path(ANALYSIS_FOLDER)
 
                 filename = action+".txt" if not action.endswith(".txt") else action
+                path = os.path.join(ANALYSIS_FOLDER, filename)
 
-                with open(filename, 'w', encoding='utf-8') as file:
+                with open(path, 'w', encoding='utf-8') as file:
                     for category, score in scores.items():
                         file.write(f"\n{category}: {score}")
 
@@ -320,9 +337,12 @@ class AppManager:
 
                 if action.lower() == 'back':
                     continue
+
+                self.verify_path(ANALYSIS_FOLDER)
                 
-                #set filename for saving to:
+                #set filename and subfolder for saving to:
                 outfile = action+".txt" if not action.endswith(".txt") else action
+                path = os.path.join(ANALYSIS_FOLDER, outfile)
 
                 #formatting each element for file output:
                 sentences_out = "\n".join(f"{index}: {sentence}" for index, sentence in sentence_list.items())
@@ -340,10 +360,10 @@ class AppManager:
                     "Indexed Sentences: ",
                     sentences_out   
                 ]
-                with open(outfile, 'w', encoding='utf-8') as of:
+                with open(path, 'w', encoding='utf-8') as of:
                     of.write("\n".join(annotated_corpus))
 
-                print(f"Annotation Saved to {outfile}")
+                print(f"Annotation Saved to {path}")
 
                 
             elif choice == '5':
@@ -409,6 +429,7 @@ class AppManager:
                 print(f"\n{plot_cur}")
                 # do some other comparisons here
                 ################compare tag frequency########################
+                #making a dictionary of just tag::count :
                 tag_count_br = {}
                 for word, tag in tagged_br:
                     if tag in tag_count_br:
@@ -421,6 +442,8 @@ class AppManager:
                         tag_count_cur[tag] += 1
                     else:
                         tag_count_cur[tag] = 1
+
+                #sort descending:
                 sorted_tags_br = sorted(tag_count_br.items(), key=lambda item: item[1], reverse=True)
                 sorted_tags_cur = sorted(tag_count_cur.items(), key=lambda item: item[1], reverse=True)
                 print("\n----------------------------------------------------------------")
@@ -456,7 +479,13 @@ class AppManager:
                 action = input("Enter filename to save comparisons to file, enter 'back' to return to analysis menu: \n").strip()
                 if action == 'back':
                     break
+                
+                #make folder if it doesnt exist:
+                self.verify_path(ANALYSIS_FOLDER)
+
+                #make filename and add path:
                 comparison_file = action+".txt" if not action.endswith(".txt") else action
+                path = os.path.join(ANALYSIS_FOLDER, comparison_file)
 
                 #bunch of strings to just hold all the above stuff for file saving.
                 br_plot = f"Brown FreqDist: {plot_br}"
@@ -468,6 +497,7 @@ class AppManager:
                 brown_lemmas = f"Brown Lemmas: {lemmas_plot_br}"
                 cur_lemmas = f"{filename} Lemmas: {lemmas_plot_cur}"
 
+                #formatted output for file saving:
                 file_output = [
                     f"{filename} vs Brown Analysis:",
                     "*Disclaimer: all graphs are of top 50 only*",
@@ -489,10 +519,10 @@ class AppManager:
                     cur_lemmas,
                     "\n"+"-"*100+"\n"
                 ]
-                with open(comparison_file, 'w', encoding='utf-8') as file:
+                with open(path, 'w', encoding='utf-8') as file:
                     file.write("\n".join(file_output))
 
-                print(f"Comparison Analysis Saved to: {comparison_file}") 
+                print(f"Comparison Analysis Saved to: {path}") 
                     
             elif choice in ['6', 'Exit', 'exit']:
                 print("exiting...")
