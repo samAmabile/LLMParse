@@ -289,13 +289,16 @@ class AppManager:
             elif choice == '4':
                 #lemmas:
                 lemma_list = []
+                #here it prints to the terminal, formatting is correct:
                 print("Lemmas: ")
                 for index, lemma in enumerate(lemmas):
                     if (index % 10 == 0):
                         print("\n")
                     print(lemma, end=' ')
                     lemma_list.append(lemma)
+                #assigning the list of lemmas to a list of lists of 10 lemmas each:
                 lemmas_grouped = [lemma_list[i:i + 10] for i in range(0, len(lemma_list), 10)]
+                #turning the list into a string:
                 lemmas_lines = "\n".join(' '.join(word) for word in lemmas_grouped)
                 #tagged tokens:    
                 print("Tagged Tokens: ")
@@ -324,7 +327,7 @@ class AppManager:
                 #formatting each element for file output:
                 sentences_out = "\n".join(f"{index}: {sentence}" for index, sentence in sentence_list.items())
                 tagged_out = "\n".join(tagged_list)
-                lemmas_out = "\n".join(lemmas_lines)
+                lemmas_out = lemmas_lines
                 annotated_corpus = [
                     f"Annotated {filename} Corpus: ", 
                     "-------------------------------------------------------------------------------------------",
