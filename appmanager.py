@@ -3,8 +3,10 @@ from llm_access_surplus import GPTChat, DeepSeekChat
 from encorporator import Encorporator
 
 import glob
+import os
 import nltk
 import random
+import pandas as pd
 from nltk.corpus import brown
 
 nltk.download('brown')
@@ -26,7 +28,7 @@ class AppManager:
         print("2. Chat with GPT 3.5 Turbo")
         print("3. Chat with Gemini 2.5 Flash **use this one**")
         print("4. Chat with Gemini via Cloud (no API)")
-        print("5. Load file to analyze")
+        print("5. Load file to analyze") #adapt to have .csv or .txt
         print("6. Load Master Corpus")
         print("7. Parse Chat Logs into separate prompt/response files")
         choice = input("Enter selection: ")
@@ -56,27 +58,41 @@ class AppManager:
             elif live_or_generated == '2':
                 filename = geminichat.generate_larger_corpus()
             return filename
+        
         elif choice == '4':
             uri = "https://us-central1-parsellm.cloudfunctions.net/gemini-proxy"
             geminichatcloud = GeminiChatCloud(uri)
             filename = geminichatcloud.chat_loop()
             return filename
+        
+        #updated to search for both txt and csv: 
         elif choice == '5':
-            filename = self.load_file("txt")
+            folder = input("\nenter subfolder to search, or '.' for main: ")
+            filename = self.load_file(["txt", "csv"], folder)
             return filename
+        
         elif choice == '6':
-            return "master_corpus.txt"
+            master_csv = "master_corpus.csv"
+            master_txt = "master_corpus.txt"
+            return master_csv, master_txt
+        
+        #this only calls up txt files, as it was meant to parse old whole chat files:
         elif choice == '7':
             parser = Encorporator()
             choose = input(
                 "Enter [1] to enter filename, " \
-                "\nEnter [2] to choose from list of .txt files in directory\n")
+                "\nEnter [2] to choose from list of .txt files in directory" \
+                "\nEnter [3] to search in a subfolder")
             while True:
                 if choose == '1':
                     infile = input("Enter filename: ")
                     break
                 elif choose == '2':
                     infile = self.load_file("txt")
+                    break
+                elif choose == '3':
+                    folder = input("\nEnter subfolder name: ")
+                    infile = self.load_file("txt", folder)
                     break
                 else:
                     print("invalid input, please enter '1' or '2': ")
@@ -93,20 +109,26 @@ class AppManager:
             print(f"LLM responses saved to: {modelfile}, and appended to Master Corpus")
 
             #returns just the llm language file for analysis
+            #no csv because this is parsing from old chats, we could update to accomodate though:
             return llm_responses
 
         else:
             print("invalid input, please enter a number from the list of options ")
               
     #function for loading files:
-    def load_file(self, extension):
+    def load_file(self, extensions, directory='.'):
         #using regex style pattern matching to search the current directory for any .txt files
             ##**i want to add the ability to search in other places, load files not in current directory
-        pattern = f"*.{extension}"
-        savedfiles = glob.glob(pattern)
+        if isinstance(extensions, str):
+            extensions = [extensions]
+        
+        savedfiles = []
+        for suffix in extensions:
+            pattern = os.path.join(directory, f"*.{suffix}")
+            savedfiles.extend(glob.glob(pattern))
 
         if not savedfiles:
-            print("no files with extension '.txt' found in current directory")
+            print(f"no files with extension '.txt' or '.csv' found in directory: [{directory}]")
             return None
         
         print("\nselect file to load: ")
@@ -131,22 +153,69 @@ class AppManager:
         
     
     def main_loop(self):
-        filename = self.MainMenu()
-        if not filename:
+        filenames = self.MainMenu()
+        if not filenames:
             print("No filename returned from main/no file created from chat")
             return
-        
+        #if the type of chat returns both csv and txt filenames as tuple:
+        if isinstance(filenames, tuple):
+            choice = input(
+                "Enter [1] to analyze .csv containing [prompt,chat,live?,tag?]" \
+              "\nEnter [2] to analyze .txt containing LLM responses only")
+            filename = filenames[0] if choice=='1' else filenames[1]
+        #otherwise it returns just a string (like in case of load saved file)
+        else:
+            filename = filenames
         #instance of Encorporator object to access those functions:
         encorporator_a = Encorporator()
+        #whatever chat_loop returns and user selects, rawtext will be extracted from appropriate filetype:  
+        # rawtext extract from .csv:
+        if filename.endswith('.csv'):
+            #give the user more variability, they could experiment with many different things
+            df = pd.read_csv(filename)
 
-        #rawtext:
-        try:
-            with open(filename, 'r') as file:
-                rawtext = file.read()
-        except FileNotFoundError:
-            print(f"could not locate file to load")
-        except IOError as e:
-            print(f"Error: could not read data from file: {filename}; error: {e}")
+            print("What would you like to look at?")
+            while(True):
+                print("1. LLM Rawtext")
+                print("2. Prompts Rawtext")
+                if filename == 'master_corpus.csv':
+                    print("3. Live Chat Rawtext")
+                    print("4. Generated Chat Rawtext")
+                    print("5. Specific Tag")
+                    print("6. Specific Chat #")
+                selection = input("Select an option...")
+            
+                if selection == '1':
+                    rawtext = '. '.join(list(df[df["Role"]=="Model"]["Content"]))
+                    break
+                elif selection == '2':
+                    rawtext = '. '.join(list(df[df["Role"]=="User"]["Content"]))
+                    break 
+                elif selection == '3':
+                    rawtext = '. '.join(list(df[df["Live?"]==1]["Content"]))
+                    break
+                elif selection == '4':
+                    rawtext = '. '.join(list(df[df["Live?"]==0]["Content"]))
+                    break
+                elif selection == '5':
+                    tag_choice = input("Which tag?")
+                    rawtext = '. '.join(list(df[df["Tag"]==tag_choice]["Content"]))
+                    break
+                elif selection == '6':
+                    chat_choice = input("Which chat?")
+                    rawtext = '. '.join(list(df[df["Chat"]==int(chat_choice)]["Content"]))
+                    break
+                else:
+                    print("invalid input, please enter a number from the list: ")
+        else:
+        #rawtext from .txt:
+            try:
+                with open(filename, 'r') as file:
+                    rawtext = file.read()
+            except FileNotFoundError:
+                print(f"could not locate file to load")
+            except IOError as e:
+                print(f"Error: could not read data from file: {filename}; error: {e}")
 
         #basic corpus created from raw text, broken down into its parts:
         corpus = encorporator_a.encorporate(rawtext)
@@ -156,7 +225,7 @@ class AppManager:
         sentences = corpus[3]
         print(f"What would you like to do with <{filename}>?")
 
-        #here is the main analysis function of the 
+        #here is the main analysis 'function' of the program:
         while True:
             print("LANGUAGE ANALYSIS MENU")
             print("choose from the following options: ")
@@ -177,7 +246,7 @@ class AppManager:
                     continue
                 
                 filename = action+'.txt' if not action.endswith('.txt') else action
-                with open(filename, 'w') as file:
+                with open(filename, 'w', encoding='utf-8') as file:
                     file.write(formatted_fdist)
             
             elif choice == '2':
@@ -194,14 +263,14 @@ class AppManager:
 
                 filename = action+".txt" if not action.endswith(".txt") else action
 
-                with open(filename, 'w') as file:
+                with open(filename, 'w', encoding='utf-8') as file:
                     for index, lemma in enumerate(lemmas):
                         if index % 10 == 0:
                             file.write("\n")
                         file.write(lemma)
             
             elif choice == '3':
-                print("Sentiment Analysis")
+                print("Sentiment Analysis: ")
                 scores = encorporator_a.analyze_sentiment(rawtext)
                 for category, score in scores.items():
                     print(f"{category}: {score}")
@@ -213,11 +282,12 @@ class AppManager:
 
                 filename = action+".txt" if not action.endswith(".txt") else action
 
-                with open(filename, 'w') as file:
+                with open(filename, 'w', encoding='utf-8') as file:
                     for category, score in scores.items():
                         file.write(f"\n{category}: {score}")
 
             elif choice == '4':
+                #lemmas:
                 lemma_list = []
                 print("Lemmas: ")
                 for index, lemma in enumerate(lemmas):
@@ -252,11 +322,11 @@ class AppManager:
                 outfile = action+".txt" if not action.endswith(".txt") else action
 
                 #formatting each element for file output:
-                sentences_out = "\n".join(f"{index}: {sentence}" for index, sentence in sentence_list)
+                sentences_out = "\n".join(f"{index}: {sentence}" for index, sentence in sentence_list.items())
                 tagged_out = "\n".join(tagged_list)
                 lemmas_out = "\n".join(lemmas_lines)
                 annotated_corpus = [
-                    f"Annotated Corpus of {filename}", 
+                    f"Annotated {filename} Corpus: ", 
                     "-------------------------------------------------------------------------------------------",
                     "POS Tagged Tokens: ",
                     tagged_out, 
@@ -267,7 +337,7 @@ class AppManager:
                     "Indexed Sentences: ",
                     sentences_out   
                 ]
-                with open(outfile, 'w') as of:
+                with open(outfile, 'w', encoding='utf-8') as of:
                     of.write("\n".join(annotated_corpus))
 
                 print(f"Annotation Saved to {outfile}")
@@ -416,7 +486,7 @@ class AppManager:
                     cur_lemmas,
                     "\n"+"-"*100+"\n"
                 ]
-                with open(comparison_file, 'w') as file:
+                with open(comparison_file, 'w', encoding='utf-8') as file:
                     file.write("\n".join(file_output))
 
                 print(f"Comparison Analysis Saved to: {comparison_file}") 

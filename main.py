@@ -9,7 +9,7 @@ import sys
 
 
 #stupid little loading animation: 
-def fake_loading_animation(message, response, duration=3):
+def fake_loading_animation(message, response, duration=2):
 
     start = time.time()
 
@@ -35,5 +35,5 @@ if __name__=="__main__":
     print("\n")
     fake_loading_animation("Loading", "Complete")
     parseLLM = AppManager()
-
+    fake_loading_animation("Closing", "Complete")
 
