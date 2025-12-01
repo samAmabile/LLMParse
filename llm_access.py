@@ -228,10 +228,37 @@ class GeminiChat:
                     break
 
                 questions = list(df["query"])[:500] # max 500
-                tag_yes_or_no = input("\nWould you like to append a tag onto all your queries? ie. 'put in an academic tone' or 'explain it like I'm 5' - type 'yes' for yes and anything else for no ")
-                if tag_yes_or_no == 'yes':
+                #tag_yes_or_no = input("\nWould you like to append a tag onto all your queries? ie. 'put in an academic tone' or 'explain it like I'm 5' - type 'yes' for yes and anything else for no ")
+                tag_choice = input("Type 0 to proceed, 1 to add a tag, or 2 to compare 2 or more tags ")
+                if tag_choice == '1':
                     tag = input("Type your tag here: ")
-                    questions = [q + "? " + tag for q in questions]
+                    questions_tagged = [q + "? " + tag for q in questions]
+                    chat_responses = self.get_responses(questions_tagged, chat)
+                    if len(chat_responses) == 0:
+                        return None
+                    data_responses = list(df["answer"])[:len(chat_responses)]
+                    acc = self.train_classifier(chat_responses,data_responses)
+                    print("\nAbility to differentiate between chat generated responses and text from data: ")
+                    print(f"Accuracy: {acc}")
+
+                elif tag_choice == '2':
+                    tags = input("Type the tags you want to use, separated by a comma ").strip().split(',')
+                    base_responses = self.get_responses(questions, chat)
+                    if len(base_responses) == 0:
+                        return None
+                    data_responses = list(df["answer"])[:len(base_responses)]
+                    accuracies = {"base": self.train_classifier(base_responses,data_responses)}
+                    for x in range(len(tags)):
+                        qs = [q + "?" + tags[x] for q in questions]
+                        responses = self.get_responses(qs, chat)
+                        if len(responses) == 0:
+                            return None
+                        accuracies[tags[x]] = self.train_classifier(responses,data_responses)
+
+                    print("\nAbility to differentiate between chat generated responses and text from data: ")
+                    for x in accuracies:
+                        print(f"Accuracy for {x}: {accuracies[x]}")
+                    
                 else:
                     tag = ''
 
@@ -253,7 +280,7 @@ class GeminiChat:
                 print("\nAbility to differentiate between chat generated responses and text from data: ")
                 print(f"Accuracy: {acc}")
 
-                #could have option to save these results to a file 
+                
 
                 history = chat.get_history()
 

@@ -32,7 +32,7 @@ class AppManager:
         print("2. Chat with GPT 3.5 Turbo")
         print("3. Chat with Gemini 2.5 Flash **use this one**")
         print("4. Chat with Gemini via Cloud (no API)")
-        print("5. Load file to analyze") #adapt to have .csv or .txt
+        print("5. Load file to analyze") #adapted to have .csv and .txt
         print("6. Load Master Corpus")
         print("7. Parse Chat Logs into separate prompt/response files")
         choice = input("Enter selection: ")
@@ -183,6 +183,7 @@ class AppManager:
 
             print("What would you like to look at?")
             while(True):
+                print("0. Exit")
                 print("1. LLM Rawtext")
                 print("2. Prompts Rawtext")
                 if filename == 'master_corpus.csv':
@@ -191,8 +192,10 @@ class AppManager:
                     print("5. Specific Tag")
                     print("6. Specific Chat #")
                 selection = input("Select an option...")
-            
-                if selection == '1':
+
+                if selection == '0':
+                    return
+                elif selection == '1':
                     rawtext = '. '.join(list(df[df["Role"]=="Model"]["Content"]))
                     break
                 elif selection == '2':
@@ -207,10 +210,16 @@ class AppManager:
                 elif selection == '5':
                     tag_choice = input("Which tag?")
                     rawtext = '. '.join(list(df[df["Tag"]==tag_choice]["Content"]))
+                    if len(rawtext) < 3:
+                        print("No tags found")
+                        continue
                     break
                 elif selection == '6':
                     chat_choice = input("Which chat?")
                     rawtext = '. '.join(list(df[df["Chat"]==int(chat_choice)]["Content"]))
+                    if len(rawtext) < 3:
+                        print("No chats found")
+                        continue
                     break
                 else:
                     print("invalid input, please enter a number from the list: ")
