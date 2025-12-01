@@ -147,6 +147,18 @@ class GeminiChat:
         #return csv and llm_content for analysis, offer user choice:
         return csvname, llm_content
     
+    def get_responses(self, questions, chat):
+        chat_responses = []
+        for q in questions:
+            try:
+                response = chat.send_message(q)
+                chat_responses.append(response.text)
+            except Exception as e:
+                print("API connection timed out: {e}")
+                break
+        return chat_responses
+
+
     def train_classifier(self, chat_responses, data_responses):
         chat_df = pd.DataFrame({
             "text": chat_responses,
@@ -262,25 +274,6 @@ class GeminiChat:
                 else:
                     tag = ''
 
-                chat_responses = []
-                for q in questions:
-                    try:
-                        response = chat.send_message(q)
-                        chat_responses.append(response.text)
-                    except Exception as e:
-                        print("API connection timed out: {e}")
-                        break
-
-                data_responses = list(df["answer"])[:len(chat_responses)]
-
-                if len(chat_responses) == 0:
-                    return None
-
-                acc,f1 = self.train_classifier(chat_responses,data_responses)
-                print("\nAbility to differentiate between chat generated responses and text from data: ")
-                print(f"Accuracy: {acc}")
-
-                
 
                 history = chat.get_history()
 
