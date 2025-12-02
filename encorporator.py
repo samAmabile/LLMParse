@@ -49,7 +49,7 @@ class Encorporator:
         clean = [s.replace('*', '') for s in sentences_raw]
         sentences = [s for s in clean if s != '']
         return sentences
-
+    
     #split rawtext by tokens:
     def parse_tokens(self, rawtext)->list:
         tokens = word_tokenize(rawtext)
@@ -143,7 +143,7 @@ class Encorporator:
         promptfile = os.path.join(TESTS_FOLDER, promptname)
         modelfile = os.path.join(TESTS_FOLDER, modelname)
 
-        with open(promptfile, 'w') as f1, open("master_prompts.txt", 'a') as promptlog:
+        with open(promptfile, 'w', encoding='utf-8') as f1, open("master_prompts.txt", 'a', encoding='utf-8') as promptlog:
             f1.write("\n".join(prompts))
             promptlog.write("\n".join(prompts))
         with open(modelfile, 'w') as f2, open("master_corpus.txt", 'a') as master:
