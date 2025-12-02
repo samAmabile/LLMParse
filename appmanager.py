@@ -167,8 +167,9 @@ class AppManager:
         #if the type of chat returns both csv and txt filenames as tuple:
         if isinstance(filenames, tuple):
             choice = input(
-                "Enter [1] to analyze .csv containing [prompt,chat,live?,tag?]" \
-              "\nEnter [2] to analyze .txt containing LLM responses only")
+              "\nEnter [1] to analyze .csv containing [prompt,chat,live?,tag?]" \
+              "\nEnter [2] to analyze .txt containing LLM responses only" \
+              "\nEnter choice: ")
             filename = filenames[0] if choice=='1' else filenames[1]
         #otherwise it returns just a string (like in case of load saved file)
         else:
@@ -256,7 +257,7 @@ class AppManager:
 
             if choice == '1':
                 formatted_fdist = encorporator_a.pretty_print_fdist(tokens)
-                action = input("\nenter filename to save to .txt file, enter 'back' to return to corpus analysis menu\n").strip()
+                action = input("\nenter filename to save to .txt file, enter 'back' to return to corpus analysis menu: ")
 
                 if action.lower() == 'back':
                     continue
@@ -298,13 +299,15 @@ class AppManager:
                 for category, score in scores.items():
                     print(f"{category}: {score}")
 
-                action = input("enter filename to save to .txt file, enter 'back' to return to corpus analysis menu").strip()
+                action = input("\nenter filename to save to .txt file, enter 'back' to return to corpus analysis menu: ").strip()
 
                 if action.lower() == 'back':
                     continue
                 
+                #verify analysis folder exists, or make one:
                 self.verify_path(ANALYSIS_FOLDER)
 
+                #ensure .txt suffix, add path to filename:
                 filename = action+".txt" if not action.endswith(".txt") else action
                 path = os.path.join(ANALYSIS_FOLDER, filename)
 
@@ -312,7 +315,9 @@ class AppManager:
                     for category, score in scores.items():
                         file.write(f"\n{category}: {score}")
 
+            #this option makes annotated corpus, appends to master annotated
             elif choice == '4':
+                
                 #lemmas:
                 lemma_list = []
                 #here it prints to the terminal, formatting is correct:
@@ -369,8 +374,9 @@ class AppManager:
                     "Indexed Sentences: ",
                     sentences_out   
                 ]
-                with open(path, 'w', encoding='utf-8') as of:
+                with open(path, 'w', encoding='utf-8') as of, open("master_annotated_corpus.txt", 'a', encoding='utf-8') as m:
                     of.write("\n".join(annotated_corpus))
+                    m.write("\n".join(annotated_corpus))
 
                 print(f"Annotation Saved to {path}")
 

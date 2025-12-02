@@ -44,7 +44,10 @@ class Encorporator:
     
     #split rawtext by sentence:
     def parse_sentence(self, rawtext)->list:
-        sentences = rawtext.split('. ')
+        sentences_raw = rawtext.split('. ')
+        #clean all the '*' noise:
+        clean = [s.replace('*', '') for s in sentences_raw]
+        sentences = [s for s in clean if s != '']
         return sentences
 
     #split rawtext by tokens:
@@ -105,7 +108,7 @@ class Encorporator:
         self.verify_path(TESTS_FOLDER)
 
         
-        with open(infilename, 'r') as infile:
+        with open(infilename, 'r', encoding='utf-8') as infile:
             for line in infile:
                 text = line.strip()
                 if not text or text == '---':
@@ -156,7 +159,21 @@ class Encorporator:
     #primary function of class, uses all other functions and returns a tuple of all the parsed types in corpus:
     def encorporate(self ,rawtext):
         sentences = self.parse_sentence(rawtext)
-        tokens = self.parse_tokens(rawtext)
+        raw_tokens = self.parse_tokens(rawtext)
+        #to remove '*', which LLM's seem to love:
+        tokens = []
+        for t in raw_tokens:
+            #remove standalone '*'
+            if t == '*':
+                continue
+            
+            #remove '*' attached to words:
+            clean = t.strip('*')
+
+            #if anything left after cleaning, append:
+            if clean:
+                tokens.append(clean)
+
         lower_tokens = [w.lower() for w in tokens]
         lemmatizer = WordNetLemmatizer()
         tagged = nltk.pos_tag(lower_tokens)
