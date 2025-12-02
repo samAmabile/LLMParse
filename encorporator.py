@@ -91,8 +91,9 @@ class Encorporator:
 
     #this function is to retroactively parse files with both prompt and response into 
     #   two separate files, also removes [USER] and [MODEL] tags from those files:
-    def parse_chat(self, infilename, prompt, model):
-
+    def parse_chat(self, infilename, promptinfile, modelinfile):
+        
+        
         prompts = []
         llm_responses = []
         prompt_tag = "[USER]:"
@@ -129,13 +130,15 @@ class Encorporator:
                     else:
                         prompt = text.strip()
                     prompts.append(prompt)
-                
+        
+        
         #then save each to its own file
-        prompt = prompt+".txt" if not prompt.endswith(".txt") else prompt
-        model = model+".txt" if not model.endswith(".txt") else model
+        promptname = promptinfile+".txt" if not promptinfile.endswith(".txt") else promptinfile
+        modelname = modelinfile+".txt" if not modelinfile.endswith(".txt") else modelinfile
 
-        promptfile = os.path.join(TESTS_FOLDER, prompt)
-        modelfile = os.path.join(TESTS_FOLDER, model)
+        #everything gets the path for tests:
+        promptfile = os.path.join(TESTS_FOLDER, promptname)
+        modelfile = os.path.join(TESTS_FOLDER, modelname)
 
         with open(promptfile, 'w') as f1, open("master_prompts.txt", 'a') as promptlog:
             f1.write("\n".join(prompts))

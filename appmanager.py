@@ -239,7 +239,7 @@ class AppManager:
         lemmas = corpus[1]
         tokens = corpus[2]
         sentences = corpus[3]
-        print(f"What would you like to do with <{filename}>?")
+        print(f"\nWhat would you like to do with <{filename}>?  ")
 
         #here is the main analysis 'function' of the program:
         while True:
@@ -252,7 +252,7 @@ class AppManager:
             print("5. Compare to another corpus")
             print("6. Exit")
 
-            choice = input("Enter your choice: ")
+            choice = input("\nEnter your choice: ")
 
             if choice == '1':
                 formatted_fdist = encorporator_a.pretty_print_fdist(tokens)

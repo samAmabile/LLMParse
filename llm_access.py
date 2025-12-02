@@ -115,13 +115,11 @@ class GeminiChat:
 
         if history:
             csvname = self.write_to_csv(history,1,'')
-            txtname = csvname.replace('.csv', '.txt')
+            txtfile = csvname.replace('.csv', '.txt')
+            
 
-            #verify/make tests folder:
-            self.verify_path(TESTS_FOLDER)
-
-            #added path "/tests" to txt filename:
-            txtfile = os.path.join(TESTS_FOLDER, txtname)
+            #both filenames now have path preppended from write_to_csv function(tests/)
+            
 
             with open(txtfile, 'w', encoding='utf-8') as file, open("master_chat_log.txt", 'a', encoding='utf-8') as master:
                 for message in history:
@@ -131,11 +129,14 @@ class GeminiChat:
                     master.write(f"[{role}]: {content}\n---\n")
                 master.write("\n****END OF CHAT****\n")
 
-                #making standard names for promts vs llm_content:
-                promptfile = "prompts_"+txtfile
-                modelfile = "llm_content_"+txtfile
-                    
-                prompts, llm_content = parser.parse_chat(txtfile, promptfile, modelfile)
+            #making standard names for promts vs llm_content:
+            #remove path to adjust filenames:
+            txtfile_base = os.path.basename(txtfile)
+            promptfile = f"prompts_{txtfile_base}"
+            modelfile = f"llm_content_{txtfile_base}"
+                
+            #tests/ path gets added back from parse_chat
+            prompts, llm_content = parser.parse_chat(txtfile, promptfile, modelfile)
         else:
             print("No content to save")
             return None    
@@ -242,6 +243,7 @@ class GeminiChat:
                 questions = list(df["query"])[:500] # max 500
                 #tag_yes_or_no = input("\nWould you like to append a tag onto all your queries? ie. 'put in an academic tone' or 'explain it like I'm 5' - type 'yes' for yes and anything else for no ")
                 tag_choice = input("Type 0 to proceed, 1 to add a tag, or 2 to compare 2 or more tags ")
+                
                 if tag_choice == '1':
                     tag = input("Type your tag here: ")
                     questions_tagged = [q + "? " + tag for q in questions]
@@ -252,6 +254,8 @@ class GeminiChat:
                     acc = self.train_classifier(chat_responses,data_responses)
                     print("\nAbility to differentiate between chat generated responses and text from data: ")
                     print(f"Accuracy: {acc}")
+
+                    
 
                 elif tag_choice == '2':
                     tags = input("Type the tags you want to use, separated by a comma ").strip().split(',')
@@ -271,6 +275,8 @@ class GeminiChat:
                     for x in accuracies:
                         print(f"Accuracy for {x}: {accuracies[x]}")
                     
+                    
+
                 else:
                     tag = ''
 
@@ -281,14 +287,9 @@ class GeminiChat:
 
                     #keeping both options, leading with csv:
                     csvfile = self.write_to_csv(history,0,tag)
-                    txtfile = csvfile.replace('.csv', '.txt')
+                    txtname = csvfile.replace('.csv', '.txt')
 
-                    #check or make /tests folder:
-                    self.verify_path(TESTS_FOLDER)
-
-                    #path added "/tests/txtfile":
-                    txtname = os.path.join(TESTS_FOLDER, txtfile)
-                    
+        
                     #writing to txt (this should be in a separate function):
                     with open(txtname, 'w', encoding='utf-8') as file, open("master_chat_log.txt", 'a', encoding='utf-8') as master:
                         for message in history:
@@ -299,9 +300,12 @@ class GeminiChat:
                         master.write("\n****END OF CHAT****\n")
 
                     #using the parser to parse the full chat into prompt and llm txt files:
-                    promptfile = "prompts_"+txtname
-                    modelfile = "llm_content_"+txtname
+                    #remove path to adjust filenames:
+                    txtname_base = os.path.basename(txtname)
+                    promptfile = f"prompts_{txtname_base}"
+                    modelfile = f"llm_content_{txtname_base}"
                     
+                    # tests\ path gets appended by parse_chat, so these have path affixed:
                     prompts, llm_content = parser.parse_chat(txtname, promptfile, modelfile)
 
                     #now we are saving all three, the full log, the prompts, and the llm responses, 
@@ -424,11 +428,9 @@ class GeminiChatCloud:
             
             #write to csv file:
             csvfile = self.write_to_csv_cloud(1, '')
-            txtname = csvfile.replace('.csv', '.txt')
+            txtfile = csvfile.replace('.csv', '.txt')
             
-            self.verify_path_cloud(TESTS_FOLDER)
-
-            txtfile = os.path.join(TESTS_FOLDER, txtname)
+            #both filenames already have path preppended from the write_to_csv function
             
             #writing to txt file:
             with open(txtfile, 'w', encoding='utf-8') as file, open("master_chat_log.txt", 'a', encoding='utf-8') as master:
@@ -439,9 +441,12 @@ class GeminiChatCloud:
                     master.write(f"[{role}]: {content}\n---\n")
                 master.write("\n****END OF CHAT****\n")
 
-                promptfile = "prompts_"+txtfile
-                modelfile = "llm_content_"+txtfile
-                    
+                #remove tests\ path
+                txtfile_base = os.path.basename(txtfile)
+                promptfile = f"prompts_{txtfile_base}"
+                modelfile = f"llm_content_{txtfile_base}"
+                
+                #parse chat adds tests\ path: 
                 prompts, llm_content = parser.parse_chat(txtfile, promptfile, modelfile)
         else:
             print("No content to save")

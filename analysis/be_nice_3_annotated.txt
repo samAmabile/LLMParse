@@ -1,0 +1,292 @@
+Annotated tests\llm_content_be_nice_3.txt Corpus: 
+-------------------------------------------------------------------------------------------
+POS Tagged Tokens: 
+that[DT] 's[VBZ] a[DT] really[RB] perceptive[JJ] question[NN] ,[,] and[CC] it[PRP] 's[VBZ]
+true[JJ] that[IN] many[JJ] people[NNS] are[VBP] noticing[VBG] fewer[JJR] birds[NNS] in[IN] certain[JJ]
+areas[NNS] .[.] it[PRP] can[MD] be[VB] quite[RB] disheartening[VBG] ![.] the[DT] reality[NN]
+is[VBZ] ,[,] it[PRP] 's[VBZ] a[DT] mix[NN] of[IN] natural[JJ] cycles[NNS] and[CC]
+some[DT] serious[JJ] challenges[NNS] birds[NNS] are[VBP] facing[VBG] globally[RB] .[.] here[RB] are[VBP]
+some[DT] of[IN] the[DT] main[JJ] reasons[NNS] you[PRP] might[MD] be[VB] seeing[VBG] fewer[JJR]
+of[IN] our[PRP$] feathered[JJ] friends[NNS] :[:] 1[CD] .[.] *[VB] *[JJ] migration[NN]
+:[:] *[NN] *[NN] sometimes[RB] ,[,] it[PRP] 's[VBZ] a[DT] natural[JJ] cycle[NN]
+â€[NNP] “[NNP] many[JJ] birds[NNS] are[VBP] migratory[JJ] and[CC] simply[RB] move[VB] to[TO]
+different[JJ] regions[NNS] for[IN] breeding[VBG] or[CC] wintering[VBG] .[.] your[PRP$] garden[NN] might[MD]
+be[VB] a[DT] bustling[JJ] highway[NN] for[IN] them[PRP] at[IN] one[CD] time[NN] of[IN]
+year[NN] and[CC] quieter[NN] at[IN] another[DT] .[.] 2[CD] .[.] *[VB] *[JJ]
+habitat[JJ] loss[NN] and[CC] degradation[NN] :[:] *[JJ] *[NN] this[DT] is[VBZ] one[CD]
+of[IN] the[DT] biggest[JJS] reasons[NNS] .[.] as[IN] our[PRP$] towns[NNS] and[CC] cities[NNS]
+expand[VBP] ,[,] and[CC] agricultural[JJ] lands[NNS] grow[VBP] ,[,] natural[JJ] areas[NNS] like[IN]
+forests[NNS] ,[,] wetlands[NNS] ,[,] and[CC] grasslands[NNS] â€[VBP] “[VB] where[WRB] birds[NNS]
+find[VBP] food[NN] ,[,] shelter[NN] ,[,] and[CC] places[NNS] to[TO] nest[VB] â€[JJ]
+“[NNP] shrink[NN] or[CC] become[VB] fragmented[JJ] .[.] this[DT] leaves[VBZ] them[PRP] with[IN]
+fewer[JJR] safe[JJ] places[NNS] to[TO] live[VB] .[.] 3[CD] .[.] *[VB] *[JJ]
+pesticides[NNS] and[CC] pollution[NN] :[:] *[JJ] *[NNP] pesticides[NNS] used[VBN] in[IN] agriculture[NN]
+and[CC] even[RB] in[IN] home[NN] gardens[NNS] can[MD] reduce[VB] insect[JJ] populations[NNS] ,[,]
+which[WDT] are[VBP] a[DT] vital[JJ] food[NN] source[NN] for[IN] many[JJ] birds[NNS] ,[,]
+especially[RB] during[IN] breeding[VBG] season[NN] .[.] these[DT] chemicals[NNS] can[MD] also[RB] directly[RB]
+harm[JJ] birds[NNS] or[CC] weaken[VB] them[PRP] .[.] 4[CD] .[.] *[VB] *[JJ]
+climate[NN] change[NN] :[:] *[NN] *[IN] shifting[VBG] weather[NN] patterns[NNS] ,[,] more[RBR]
+extreme[JJ] storms[NNS] ,[,] and[CC] changes[NNS] in[IN] food[NN] availability[NN] due[JJ] to[TO]
+a[DT] warming[VBG] climate[NN] can[MD] disrupt[VB] migration[NN] routes[NNS] ,[,] breeding[VBG] success[NN]
+,[,] and[CC] overall[JJ] survival[NN] rates[NNS] for[IN] many[JJ] species[NNS] .[.] 5[CD]
+.[.] *[VB] *[JJ] domestic[JJ] cats[NNS] :[:] *[NN] *[NN] while[IN] beloved[VBN]
+pets[NNS] ,[,] outdoor[JJ] cats[NNS] are[VBP] significant[JJ] predators[NNS] of[IN] birds[NNS] ,[,]
+especially[RB] in[IN] suburban[JJ] and[CC] rural[JJ] areas[NNS] .[.] 6[CD] .[.] *[VB]
+*[JJ] window[JJ] collisions[NNS] :[:] *[NN] *[NN] birds[NNS] often[RB] do[VBP] n't[RB]
+see[VB] clear[JJ] or[CC] reflective[JJ] glass[NN] and[CC] can[MD] collide[VB] with[IN] windows[NNS]
+,[,] especially[RB] in[IN] urban[JJ] environments[NNS] .[.] 7[CD] .[.] *[JJ] *[JJ]
+light[JJ] pollution[NN] :[:] *[JJ] *[NNP] artificial[JJ] lights[NNS] at[IN] night[NN] can[MD]
+disorient[VB] migratory[NN] birds[NNS] ,[,] causing[VBG] them[PRP] to[TO] stray[VB] off[RP] course[NN]
+or[CC] collide[NN] with[IN] buildings[NNS] .[.] *[JJ] *[NN] but[CC] it[PRP] 's[VBZ]
+not[RB] all[DT] grim[JJ] news[NN] ![.] *[JJ] *[JJ] many[JJ] people[NNS] and[CC]
+organizations[NNS] are[VBP] working[VBG] tirelessly[RB] on[IN] conservation[NN] efforts[NNS] ,[,] restoring[VBG] habitats[NNS]
+,[,] advocating[VBG] for[IN] bird-friendly[JJ] policies[NNS] ,[,] and[CC] raising[VBG] awareness[NN] .[.]
+*[VB] *[IN] what[WP] can[MD] *[VB] you[PRP] *[VB] do[VB] to[TO] help[VB]
+?[.] *[VB] *[NNP] even[RB] small[JJ] actions[NNS] can[MD] make[VB] a[DT] big[JJ]
+difference[NN] for[IN] our[PRP$] feathered[JJ] friends[NNS] :[:] *[NN] *[NNP] *[NNP] plant[NN]
+native[JJ] species[NNS] :[:] *[VB] *[NNP] create[VB] a[DT] bird-friendly[JJ] garden[NN] with[IN]
+native[JJ] plants[NNS] that[WDT] provide[VBP] natural[JJ] food[NN] ([(] berries[NNS] ,[,] seeds[NNS]
+,[,] nectar[NN] )[)] and[CC] shelter[NN] for[IN] local[JJ] birds[NNS] .[.] *[VB]
+*[JJ] *[NNP] provide[VBP] clean[JJ] water[NN] :[:] *[NN] *[VBZ] a[DT] bird[JJ]
+bath[NN] can[MD] be[VB] a[DT] lifeline[NN] ,[,] especially[RB] during[IN] dry[JJ] or[CC]
+freezing[VBG] weather[NN] .[.] *[CC] *[JJ] *[JJ] keep[VB] pet[NN] cats[NNS] indoors[NNS]
+:[:] *[NN] *[NN] this[DT] is[VBZ] one[CD] of[IN] the[DT] most[RBS] impactful[JJ]
+things[NNS] you[PRP] can[MD] do[VB] to[TO] protect[VB] local[JJ] bird[NN] populations[NNS] .[.]
+*[VB] *[JJ] *[NNP] reduce[VB] pesticide[NN] use[NN] :[:] *[NN] *[VBZ] opt[RP]
+for[IN] organic[JJ] gardening[NN] methods[NNS] to[TO] protect[VB] insects[NNS] ,[,] which[WDT] are[VBP]
+a[DT] crucial[JJ] food[NN] source[NN] for[IN] many[JJ] birds[NNS] .[.] *[VB] *[JJ]
+*[NNP] support[NN] local[JJ] conservation[NN] efforts[NNS] :[:] *[VB] *[JJ] organizations[NNS] working[VBG]
+to[TO] protect[VB] bird[NN] habitats[NNS] always[RB] appreciate[VBP] support[NN] .[.] *[VB] *[JJ]
+*[NNS] make[VBP] your[PRP$] windows[NNS] bird-safe[JJ] :[:] *[NN] *[NN] use[NN] decals[NNS]
+,[,] screens[NNS] ,[,] or[CC] other[JJ] methods[NNS] to[TO] make[VB] your[PRP$] windows[NNS]
+more[RBR] visible[JJ] to[TO] birds[NNS] .[.] *[VB] *[JJ] *[NNP] participate[NN] in[IN]
+citizen[JJ] science[NN] :[:] *[JJ] *[JJ] programs[NNS] like[IN] the[DT] great[JJ] backyard[JJ]
+bird[NN] count[NN] or[CC] ebird[VB] help[NN] scientists[NNS] track[VBP] bird[NN] populations[NNS] and[CC]
+understand[VB] trends[NNS] .[.] your[PRP$] observation[NN] is[VBZ] important[JJ] ,[,] and[CC] by[IN]
+understanding[VBG] why[WRB] birds[NNS] might[MD] seem[VB] to[TO] be[VB] disappearing[VBG] ,[,] we[PRP]
+can[MD] all[DT] contribute[VB] to[TO] making[VBG] the[DT] world[NN] a[DT] safer[JJR] ,[,]
+more[RBR] welcoming[JJ] place[NN] for[IN] them[PRP] .[.] that[DT] 's[VBZ] such[PDT] a[DT]
+lovely[JJ] and[CC] insightful[JJ] question[NN] ![.] while[IN] squirrels[NNS] do[VBP] n't[RB] ``[``]
+think[VB] ''[''] with[IN] complex[JJ] human[JJ] plans[NNS] or[CC] worries[NNS] ,[,] they[PRP]
+are[VBP] driven[VBN] by[IN] incredibly[RB] strong[JJ] instincts[NNS] that[WDT] look[VBP] a[DT] lot[NN]
+like[IN] purposeful[JJ] preparation[NN] .[.] if[IN] we[PRP] could[MD] peek[VB] into[IN] their[PRP$]
+busy[JJ] ,[,] little[JJ] furry[NN] brains[NNS] as[IN] winter[NN] approaches[NNS] ,[,] it[PRP]
+might[MD] sound[VB] something[NN] like[IN] this[DT] :[:] ''[''] oh[UH] ,[,] goodness[NN]
+![.] the[DT] days[NNS] are[VBP] getting[VBG] shorter[JJR] ,[,] and[CC] that[DT] crispness[NN]
+in[IN] the[DT] air[NN] is[VBZ] n't[RB] just[RB] a[DT] coincidence[NN] .[.] it[PRP]
+'s[VBZ] go-time[JJ] ![.] *[NN] *[VBD] first[JJ] things[NNS] first[RB] :[:] food[NN]
+,[,] glorious[JJ] food[NN] ![.] *[NN] *[NNP] *[NNP] ``[``] every[DT] acorn[NN]
+,[,] every[DT] nut[NN] ,[,] every[DT] fallen[NN] seed[NN] is[VBZ] a[DT] treasure[NN]
+.[.] must[MD] gather[VB] them[PRP] all[DT] ![.] the[DT] ground[NN] is[VBZ] full[JJ]
+of[IN] bounty[NN] right[NN] now[RB] ,[,] but[CC] soon[RB] it[PRP] 'll[MD] be[VB]
+frozen[JJ] solid[JJ] .[.] do[VBP] n't[RB] be[VB] lazy[JJ] ,[,] little[JJ] paws[NN]
+![.] ''[''] *[VBZ] ``[``] where[WRB] 's[VBZ] a[DT] good[JJ] hiding[NN] spot[NN]
+?[.] under[IN] this[DT] root[NN] ,[,] in[IN] that[DT] soft[JJ] earth[NN] ,[,]
+near[IN] that[DT] tree[NN] where[WRB] i[NN] 'll[MD] remember[VB] it[PRP] ...[:] mostly[RB]
+.[.] it[PRP] 's[VBZ] a[DT] race[NN] against[IN] time[NN] ,[,] and[CC] i[NNS]
+need[VBP] a[DT] *[NN] lot[NN] *[NNP] of[IN] stashed[JJ] snacks[NNS] to[TO] get[VB]
+through[IN] the[DT] lean[JJ] months[NNS] .[.] ''[''] *[VBZ] ``[``] and[CC] i[NN]
+ca[MD] n't[RB] just[RB] store[VB] it[PRP] ;[:] i[VB] need[VBP] to[TO] eat[VB]
+it[PRP] now[RB] too[RB] ![.] all[PDT] this[DT] extra[JJ] padding[NN] will[MD] help[VB]
+keep[VB] me[PRP] warm[JJ] when[WRB] it[PRP] 's[VBZ] truly[RB] chilly[RB] .[.] my[PRP$]
+belly[RB] feels[NNS] so[RB] delightfully[RB] full[JJ] when[WRB] i[NN] 've[VBP] had[VBD] a[DT]
+good[JJ] meal[NN] .[.] ''[''] *[VBZ] *[NNP] next[JJ] up[IN] :[:] home[NN]
+sweet[NN] home[NN] ![.] *[JJ] *[NNP] *[NNP] ``[``] this[DT] drey[NN] ([(]
+nest[JJS] )[)] needs[VBZ] an[DT] upgrade[NN] .[.] more[RBR] leaves[NNS] ,[,] more[JJR]
+twigs[NNS] ,[,] make[VBP] it[PRP] extra[JJ] thick[NN] and[CC] waterproof[NN] .[.] no[DT]
+drafts[NN] allowed[VBD] ![.] it[PRP] needs[VBZ] to[TO] be[VB] a[DT] super[JJ] snug[NN]
+,[,] cozy[JJ] fortress[NN] against[IN] the[DT] wind[NN] and[CC] snow[NN] .[.] ''['']
+*[VBZ] ``[``] maybe[RB] i[JJ] 'll[MD] check[VB] out[RP] that[IN] hollow[JJ] tree[NN]
+,[,] too[RB] ,[,] just[RB] in[IN] case[NN] .[.] options[NNS] are[VBP] good[JJ]
+.[.] a[DT] warm[JJ] ,[,] safe[JJ] place[NN] to[TO] curl[VB] up[RP] is[VBZ]
+essential[JJ] .[.] ''[''] *[VBZ] *[NNP] overall[JJ] feeling[NN] :[:] *[JJ] *[NNP]
+*[NNP] ``[``] there[EX] 's[VBZ] an[DT] urgency[NN] in[IN] the[DT] air[NN] ,[,]
+a[DT] hum[NN] that[WDT] tells[VBZ] me[PRP] to[TO] keep[VB] moving[NN] ,[,] keep[VB]
+gathering[NN] .[.] my[PRP$] inner[JJ] clock[NN] is[VBZ] ticking[VBG] ,[,] reminding[VBG] me[PRP]
+what[WP] 's[VBZ] coming[VBG] .[.] but[CC] also[RB] ,[,] there[EX] 's[VBZ] a[DT]
+deep[JJ] satisfaction[NN] in[IN] all[PDT] this[DT] hard[JJ] work[NN] .[.] i[JJ] 'm[VBP]
+building[VBG] my[PRP$] little[JJ] kingdom[NN] of[IN] comfort[NN] and[CC] survival[NN] .[.] ''['']
+*[VBZ] ``[``] it[PRP] 's[VBZ] a[DT] big[JJ] job[NN] ,[,] but[CC] i[JJ]
+'m[VBP] ready[JJ] for[IN] it[PRP] .[.] bring[VB] on[IN] the[DT] snow[JJ] â€[NNP]
+“[NNP] i[NN] 'll[MD] be[VB] prepared[JJ] ![.] ''[''] so[RB] ,[,] it[PRP]
+'s[VBZ] a[DT] mix[NN] of[IN] instinctual[JJ] drive[NN] ,[,] a[DT] keen[JJ] awareness[NN]
+of[IN] the[DT] changing[VBG] season[NN] ,[,] and[CC] an[DT] immense[JJ] focus[NN] on[IN]
+gathering[NN] and[CC] preparing[VBG] .[.] they[PRP] 're[VBP] truly[RB] fascinating[JJ] little[JJ] creatures[NNS]
+,[,] are[VBP] n't[RB] they[PRP] ?[.]
+-------------------------------------------------------------------------------------------
+Lemmatized Tokens: 
+that 's a really perceptive question , and it 's
+true that many people be notice few bird in certain
+area . it can be quite dishearten ! the reality
+be , it 's a mix of natural cycle and
+some serious challenge bird be face globally . here be
+some of the main reason you might be see few
+of our feathered friend : 1 . * * migration
+: * * sometimes , it 's a natural cycle
+â€ “ many bird be migratory and simply move to
+different region for breed or winter . your garden might
+be a bustling highway for them at one time of
+year and quieter at another . 2 . * *
+habitat loss and degradation : * * this be one
+of the big reason . a our town and city
+expand , and agricultural land grow , natural area like
+forest , wetland , and grassland â€ “ where bird
+find food , shelter , and place to nest â€
+“ shrink or become fragmented . this leave them with
+few safe place to live . 3 . * *
+pesticide and pollution : * * pesticide use in agriculture
+and even in home garden can reduce insect population ,
+which be a vital food source for many bird ,
+especially during breed season . these chemical can also directly
+harm bird or weaken them . 4 . * *
+climate change : * * shift weather pattern , more
+extreme storm , and change in food availability due to
+a warm climate can disrupt migration route , breed success
+, and overall survival rate for many specie . 5
+. * * domestic cat : * * while beloved
+pet , outdoor cat be significant predator of bird ,
+especially in suburban and rural area . 6 . *
+* window collision : * * bird often do n't
+see clear or reflective glass and can collide with window
+, especially in urban environment . 7 . * *
+light pollution : * * artificial light at night can
+disorient migratory bird , cause them to stray off course
+or collide with building . * * but it 's
+not all grim news ! * * many people and
+organization be work tirelessly on conservation effort , restore habitat
+, advocate for bird-friendly policy , and raise awareness .
+* * what can * you * do to help
+? * * even small action can make a big
+difference for our feathered friend : * * * plant
+native specie : * * create a bird-friendly garden with
+native plant that provide natural food ( berry , seed
+, nectar ) and shelter for local bird . *
+* * provide clean water : * * a bird
+bath can be a lifeline , especially during dry or
+freeze weather . * * * keep pet cat indoors
+: * * this be one of the most impactful
+thing you can do to protect local bird population .
+* * * reduce pesticide use : * * opt
+for organic gardening method to protect insect , which be
+a crucial food source for many bird . * *
+* support local conservation effort : * * organization work
+to protect bird habitat always appreciate support . * *
+* make your window bird-safe : * * use decal
+, screen , or other method to make your window
+more visible to bird . * * * participate in
+citizen science : * * program like the great backyard
+bird count or ebird help scientist track bird population and
+understand trend . your observation be important , and by
+understand why bird might seem to be disappear , we
+can all contribute to make the world a safe ,
+more welcoming place for them . that 's such a
+lovely and insightful question ! while squirrel do n't ``
+think '' with complex human plan or worry , they
+be drive by incredibly strong instinct that look a lot
+like purposeful preparation . if we could peek into their
+busy , little furry brain a winter approach , it
+might sound something like this : '' oh , goodness
+! the day be get short , and that crispness
+in the air be n't just a coincidence . it
+'s go-time ! * * first thing first : food
+, glorious food ! * * * `` every acorn
+, every nut , every fallen seed be a treasure
+. must gather them all ! the ground be full
+of bounty right now , but soon it 'll be
+frozen solid . do n't be lazy , little paw
+! '' * `` where 's a good hiding spot
+? under this root , in that soft earth ,
+near that tree where i 'll remember it ... mostly
+. it 's a race against time , and i
+need a * lot * of stashed snack to get
+through the lean month . '' * `` and i
+ca n't just store it ; i need to eat
+it now too ! all this extra padding will help
+keep me warm when it 's truly chilly . my
+belly feel so delightfully full when i 've have a
+good meal . '' * * next up : home
+sweet home ! * * * `` this drey (
+nest ) need an upgrade . more leaf , more
+twig , make it extra thick and waterproof . no
+draft allow ! it need to be a super snug
+, cozy fortress against the wind and snow . ''
+* `` maybe i 'll check out that hollow tree
+, too , just in case . option be good
+. a warm , safe place to curl up be
+essential . '' * * overall feeling : * *
+* `` there 's an urgency in the air ,
+a hum that tell me to keep moving , keep
+gathering . my inner clock be tick , remind me
+what 's come . but also , there 's a
+deep satisfaction in all this hard work . i 'm
+build my little kingdom of comfort and survival . ''
+* `` it 's a big job , but i
+'m ready for it . bring on the snow â€
+“ i 'll be prepared ! '' so , it
+'s a mix of instinctual drive , a keen awareness
+of the change season , and an immense focus on
+gathering and prepare . they 're truly fascinating little creature
+, be n't they ?
+-------------------------------------------------------------------------------------------
+Indexed Sentences: 
+0: That's a really perceptive question, and it's true that many people are noticing fewer birds in certain areas
+1: It can be quite disheartening!
+The reality is, it's a mix of natural cycles and some serious challenges birds are facing globally
+2: Here are some of the main reasons you might be seeing fewer of our feathered friends:
+1
+3:  **Migration:** Sometimes, it's a natural cycle â€“ many birds are migratory and simply move to different regions for breeding or wintering
+4: Your garden might be a bustling highway for them at one time of year and quieter at another.
+2
+5:  **Habitat Loss and Degradation:** This is one of the biggest reasons
+6: As our towns and cities expand, and agricultural lands grow, natural areas like forests, wetlands, and grasslands â€“ where birds find food, shelter, and places to nest â€“ shrink or become fragmented
+7: This leaves them with fewer safe places to live.
+3
+8:  **Pesticides and Pollution:** Pesticides used in agriculture and even in home gardens can reduce insect populations, which are a vital food source for many birds, especially during breeding season
+9: These chemicals can also directly harm birds or weaken them.
+4
+10:  **Climate Change:** Shifting weather patterns, more extreme storms, and changes in food availability due to a warming climate can disrupt migration routes, breeding success, and overall survival rates for many species.
+5
+11:  **Domestic Cats:** While beloved pets, outdoor cats are significant predators of birds, especially in suburban and rural areas.
+6
+12:  **Window Collisions:** Birds often don't see clear or reflective glass and can collide with windows, especially in urban environments.
+7
+13:  **Light Pollution:** Artificial lights at night can disorient migratory birds, causing them to stray off course or collide with buildings.
+**But it's not all grim news!** Many people and organizations are working tirelessly on conservation efforts, restoring habitats, advocating for bird-friendly policies, and raising awareness.
+**What can *you* do to help?** Even small actions can make a big difference for our feathered friends:
+*   **Plant Native Species:** Create a bird-friendly garden with native plants that provide natural food (berries, seeds, nectar) and shelter for local birds.
+*   **Provide Clean Water:** A bird bath can be a lifeline, especially during dry or freezing weather.
+*   **Keep Pet Cats Indoors:** This is one of the most impactful things you can do to protect local bird populations.
+*   **Reduce Pesticide Use:** Opt for organic gardening methods to protect insects, which are a crucial food source for many birds.
+*   **Support Local Conservation Efforts:** Organizations working to protect bird habitats always appreciate support.
+*   **Make Your Windows Bird-Safe:** Use decals, screens, or other methods to make your windows more visible to birds.
+*   **Participate in Citizen Science:** Programs like the Great Backyard Bird Count or eBird help scientists track bird populations and understand trends.
+Your observation is important, and by understanding why birds might seem to be disappearing, we can all contribute to making the world a safer, more welcoming place for them.
+That's such a lovely and insightful question! While squirrels don't "think" with complex human plans or worries, they are driven by incredibly strong instincts that look a lot like purposeful preparation
+14: If we could peek into their busy, little furry brains as winter approaches, it might sound something like this:
+"Oh, goodness! The days are getting shorter, and that crispness in the air isn't just a coincidence
+15: It's go-time!
+**First things first: Food, glorious food!**
+*   "Every acorn, every nut, every fallen seed is a treasure
+16: Must gather them all! The ground is full of bounty right now, but soon it'll be frozen solid
+17: Don't be lazy, little paws!"
+*   "Where's a good hiding spot? Under this root, in that soft earth, near that tree where I'll remember it..
+18: mostly
+19: It's a race against time, and I need a *lot* of stashed snacks to get through the lean months."
+*   "And I can't just store it; I need to eat it now too! All this extra padding will help keep me warm when it's truly chilly
+20: My belly feels so delightfully full when I've had a good meal."
+**Next up: Home Sweet Home!**
+*   "This drey (nest) needs an upgrade
+21: More leaves, more twigs, make it extra thick and waterproof
+22: No drafts allowed! It needs to be a super snug, cozy fortress against the wind and snow."
+*   "Maybe I'll check out that hollow tree, too, just in case
+23: Options are good
+24: A warm, safe place to curl up is essential."
+**Overall feeling:**
+*   "There's an urgency in the air, a hum that tells me to keep moving, keep gathering
+25: My inner clock is ticking, reminding me what's coming
+26: But also, there's a deep satisfaction in all this hard work
+27: I'm building my little kingdom of comfort and survival."
+*   "It's a big job, but I'm ready for it
+28: Bring on the snow â€“ I'll be prepared!"
+So, it's a mix of instinctual drive, a keen awareness of the changing season, and an immense focus on gathering and preparing
+29: They're truly fascinating little creatures, aren't they?
