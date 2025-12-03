@@ -46,8 +46,9 @@ class GeminiChat:
         os.makedirs(folder, exist_ok=True)
 
 
-    def write_to_csv(self,history,live,tag):
-        
+    def write_to_csv(self,history,live,tags):
+        tags = [i for i in tags for _ in range(2)] # duplicate the list
+
         chatname = input("\nEnter a filename to save chat: ")
         filename = chatname+".csv" if not chatname.endswith(".csv") else chatname
 
@@ -72,11 +73,11 @@ class GeminiChat:
             master_writer = csv.writer(master)
             #moved up to try/except
             #chat_num = list(pd.read_csv('master_corpus.csv')["Chat"])[-1] + 1
-            for message in history:
+            for i,message in enumerate(history):
                 role = message.role.capitalize()
                 content = message.parts[0].text
-                writer.writerow([role, content, live, tag])
-                master_writer.writerow([role, content, live, tag, chat_num])
+                writer.writerow([role, content, live, tags[i]])
+                master_writer.writerow([role, content, live, tags[i], chat_num])
         
         #returns the path of the file now: tests/filename:
         return path 
@@ -114,7 +115,7 @@ class GeminiChat:
         history = chat.get_history()
 
         if history:
-            csvname = self.write_to_csv(history,1,'')
+            csvname = self.write_to_csv(history,1,['' for _ in range(len(history))])
             txtfile = csvname.replace('.csv', '.txt')
             
 
@@ -148,16 +149,13 @@ class GeminiChat:
         #return csv and llm_content for analysis, offer user choice:
         return csvname, llm_content
     
-    def get_responses(self, questions, chat):
-        chat_responses = []
-        for q in questions:
-            try:
-                response = chat.send_message(q)
-                chat_responses.append(response.text)
-            except Exception as e:
-                print("API connection timed out: {e}")
-                break
-        return chat_responses
+    def get_response(self, question, chat):
+        try:
+            response = chat.send_message(question)
+        except Exception as e:
+            print("API connection timed out: {e}")
+            return 'e'
+        return response.text
 
 
     def train_classifier(self, chat_responses, data_responses):
@@ -240,18 +238,27 @@ class GeminiChat:
                 if continue_button == 'back':
                     break
 
-                questions = list(df["query"])[:500] # max 500
+                questions = list(df["query"])[:100] 
                 #tag_yes_or_no = input("\nWould you like to append a tag onto all your queries? ie. 'put in an academic tone' or 'explain it like I'm 5' - type 'yes' for yes and anything else for no ")
                 tag_choice = input("Type 0 to proceed, 1 to add a tag, or 2 to compare 2 or more tags ")
-                
+                tags_per_prompt = []
+
                 if tag_choice == '1':
                     tag = input("Type your tag here: ")
                     questions_tagged = [q + "? " + tag for q in questions]
-                    chat_responses = self.get_responses(questions_tagged, chat)
-                    if len(chat_responses) == 0:
+                    chat_responses = []
+                    for i,q in enumerate(questions_tagged):
+                        resp = self.get_response(q,chat)
+                        if resp == 'e':
+                            print(f"After {i} calls")
+                            break
+                        chat_responses.append(resp)
+                        tags_per_prompt.append(tag)
+
+                    if len(chat_responses) < 2:
                         return None
                     data_responses = list(df["answer"])[:len(chat_responses)]
-                    acc = self.train_classifier(chat_responses,data_responses)
+                    acc = self.train_classifier(chat_responses,data_responses)[0]
                     print("\nAbility to differentiate between chat generated responses and text from data: ")
                     print(f"Accuracy: {acc}")
 
@@ -259,34 +266,45 @@ class GeminiChat:
 
                 elif tag_choice == '2':
                     tags = input("Type the tags you want to use, separated by a comma ").strip().split(',')
-                    base_responses = self.get_responses(questions, chat)
-                    if len(base_responses) == 0:
-                        return None
-                    data_responses = list(df["answer"])[:len(base_responses)]
-                    accuracies = {"base": self.train_classifier(base_responses,data_responses)}
-                    for x in range(len(tags)):
-                        qs = [q + "?" + tags[x] for q in questions]
-                        responses = self.get_responses(qs, chat)
-                        if len(responses) == 0:
+                    all_questions = []
+                    for t in tags:
+                        all_questions.append(questions)
+                        qs = [q + "?" + t for q in questions]
+                        all_questions.append(qs)
+
+                    all_responses = [[] for _ in range(len(tags)+1)]
+                    break_out=False
+                    for x in range(len(all_questions[0])):
+                        for y in range(len(tags)+1):
+                            resp = self.get_response(all_questions[y][x], chat)
+                            if resp == 'e':
+                                print(f"After {y + x*(len(tags)+1)} calls")
+                                break_out = True
+                                break
+                            all_responses[y].append(resp)
+                            tags_per_prompt.append('' if y == 0 else tags[y-1])
+                        if break_out:
+                            break
+
+                    for x in all_responses:
+                        if len(x) < 2:
                             return None
-                        accuracies[tags[x]] = self.train_classifier(responses,data_responses)
+                    
+                    data_responses = [list(df["answer"])[:len(x)] for x in all_responses]
+                    accuracies = [self.train_classifier(all_responses[x],data_responses[x])[0] for x in range(len(tags)+1)]
 
                     print("\nAbility to differentiate between chat generated responses and text from data: ")
-                    for x in accuracies:
-                        print(f"Accuracy for {x}: {accuracies[x]}")
-                    
-                    
+                    for i,x in enumerate(accuracies):
+                        print(f"Accuracy for {i} tag: {x}") 
 
                 else:
                     tag = ''
 
-
                 history = chat.get_history()
 
                 if history:
-
                     #keeping both options, leading with csv:
-                    csvfile = self.write_to_csv(history,0,tag)
+                    csvfile = self.write_to_csv(history,0,tags_per_prompt)
                     txtname = csvfile.replace('.csv', '.txt')
 
         
