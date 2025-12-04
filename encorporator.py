@@ -146,7 +146,7 @@ class Encorporator:
         with open(promptfile, 'w', encoding='utf-8') as f1, open("master_prompts.txt", 'a', encoding='utf-8') as promptlog:
             f1.write("\n".join(prompts))
             promptlog.write("\n".join(prompts))
-        with open(modelfile, 'w') as f2, open("master_corpus.txt", 'a') as master:
+        with open(modelfile, 'w', encoding='utf-8') as f2, open("master_corpus.txt", 'a', encoding='utf-8') as master:
             f2.write("\n".join(llm_responses))
             master.write("\n".join(llm_responses))
         
