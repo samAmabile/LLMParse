@@ -227,7 +227,7 @@ class AppManager:
         else:
         #rawtext from .txt:
             try:
-                with open(filename, 'r') as file:
+                with open(filename, 'r', encoding='utf-8') as file:
                     rawtext = file.read()
             except FileNotFoundError:
                 print(f"could not locate file to load")
@@ -363,7 +363,7 @@ class AppManager:
                 tagged_out = "\n".join(tagged_list)
                 lemmas_out = lemmas_lines
                 annotated_corpus = [
-                    f"Annotated {filename} Corpus: ", 
+                    f"\nAnnotated {filename} Corpus: ", 
                     "-------------------------------------------------------------------------------------------",
                     "POS Tagged Tokens: ",
                     tagged_out, 
@@ -372,7 +372,8 @@ class AppManager:
                     lemmas_out,
                     "-------------------------------------------------------------------------------------------",
                     "Indexed Sentences: ",
-                    sentences_out   
+                    sentences_out,
+                    "-------------------------------------------------------------------------------------------"
                 ]
                 with open(path, 'w', encoding='utf-8') as of, open("master_annotated_corpus.txt", 'a', encoding='utf-8') as m:
                     of.write("\n".join(annotated_corpus))
