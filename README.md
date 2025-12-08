@@ -6,7 +6,7 @@ LLM Language Analysis and Corpus Creation Tool
 **LLM Parse** is a language analysis and corpus creation tool for LLM language analysis. It captures and parses the language of chats with LLM models for linguistic analysis of words, tokens, lemmas, word frequency, and sentiment using the NLTK library.
 
 ## File Breakdown 
-Some files are too large to view on Github.\n
+Some files are too large to view on Github.  
 **Files:**
 * **main.py** main file, calls to appmanager and initiates program
 * **encorporator.py** holds just the Encorporator class now
