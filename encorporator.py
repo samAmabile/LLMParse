@@ -1,4 +1,5 @@
 
+import csv
 import os
 import nltk
 from nltk.corpus import wordnet
@@ -44,11 +45,12 @@ class Encorporator:
     
     #split rawtext by sentence:
     def parse_sentence(self, rawtext)->list:
-        sentences_raw = rawtext.split('. ')
+        #fixed now, was incorrectly parsing sentences before:
+        sentences_raw = sent_tokenize(rawtext)
         #clean all the '*' noise:
-        clean = [s.replace('*', '') for s in sentences_raw]
-        sentences = [s for s in clean if s != '']
-        return sentences
+        #clean = [s.replace('*', '') for s in sentences_raw]
+        #sentences = [s for s in clean if s != '']
+        return sentences_raw
     
     #split rawtext by tokens:
     def parse_tokens(self, rawtext)->list:
@@ -96,6 +98,27 @@ class Encorporator:
     #   two separate files, also removes [USER] and [MODEL] tags from those files:
     def parse_chat(self, infilename, promptinfile, modelinfile):
         
+        infile = ""
+
+        #verify tests/ path for saving:
+        self.verify_path(TESTS_FOLDER)
+
+        encodings = [('utf-8', 'replace'), ('cp1254', 'replace'), ('latin-1', 'strict')]
+        
+        for encoding, error in encodings:
+            try:
+                with open(infilename, 'r', encoding=encoding, errors=error) as f:
+                    infile = f.read()
+            except UnicodeDecodeError:
+                continue
+            except FileNotFoundError:
+                print(f"Could not open file {infilename}")
+                return "", ""
+        
+        if infile is None:
+            print("All encodings failed to interpret {infilename}")
+            return "", ""
+
         
         prompts = []
         llm_responses = []
@@ -103,36 +126,30 @@ class Encorporator:
         llm_tags = ["[MODEL]:", "[ASSISTANT]:"]
 
         is_llm = False
-
-        #verify tests/ path for saving:
-        self.verify_path(TESTS_FOLDER)
-
-        
-        with open(infilename, 'r', encoding='utf-8') as infile:
-            for line in infile:
-                text = line.strip()
-                if not text or text == '---':
-                    continue
+        for line in infile.splitlines():
+            text = line.strip()
+            if not text or text == '---':
+                continue
+            if text.upper().startswith(tuple(llm_tags)):
+                is_llm = True
+            if text.upper().startswith(prompt_tag):
+                is_llm = False
+            if is_llm:
                 if text.upper().startswith(tuple(llm_tags)):
-                    is_llm = True
-                if text.upper().startswith(prompt_tag):
-                    is_llm = False
-                if is_llm:
-                    if text.upper().startswith(tuple(llm_tags)):
-                        content = text.split(':', 1)
-                        response = content[1].strip()
-                    else:
-                        response = text.strip()
-                    llm_responses.append(response)
+                    content = text.split(':', 1)
+                    response = content[1].strip()
+                else:
+                    response = text.strip()
+                llm_responses.append(response)
 
-                if not is_llm:
-                    
-                    if text.upper().startswith(prompt_tag):
-                        content = text.split(':', 1)
-                        prompt = content[1].strip()
-                    else:
-                        prompt = text.strip()
-                    prompts.append(prompt)
+            if not is_llm:
+                
+                if text.upper().startswith(prompt_tag):
+                    content = text.split(':', 1)
+                    prompt = content[1].strip()
+                else:
+                    prompt = text.strip()
+                prompts.append(prompt)
         
         
         #then save each to its own file
@@ -153,26 +170,136 @@ class Encorporator:
         #returns file paths now:
         return promptfile, modelfile
         
+    #function to parse pos, lemma, and sentence from an annotated corpus and put it in a folder with each element in its own txt file,
+    # plus a csv of the metadata that has [token_index, sentence_index, sentence, pos_token, lemma] 
+    #note: tried very hard to get the csv to line up perfectly all the way through master_annotated_corpus, but still gets off-by-one at some point
+    def parse_annotated(self, filename):
+        try:
+            with open(filename, 'r', encoding='utf-8') as f:
+                content = f.read()
+        except FileNotFoundError as e:
+            print(f"Could not load file {filename}, error: {e}")
         
+        sections = content.split("-------------------------------------------------------------------------------------------")
+        title = sections[0]
+        pos_tagged = sections[1].split('POS Tagged Tokens:')[1].strip()
+        lemmas = sections[2].split('Lemmatized Tokens:')[1].strip()
+        sentences_lines = sections[3].split('Indexed Sentences:')[1].strip().split('\n')
+
+        sentences = []
+        index = 0
+        for line in sentences_lines:
+            if line.strip() and ':' in line and line.strip().split(':')[0].isdigit() and int(line.strip().split(':')[0])==index:
+                sentence = line.split(':', 1)[1].strip()
+                index += 1
+
+            else:
+                sentence = line.strip()
+            
+            if sentence:
+                sentences.append(sentence)
+
+        sentences_out = '\n'.join(sentences)
+
+        outfilename = os.path.basename(filename)
+
+        pos_file = f"pos_{outfilename}"
+        lemma_file = f"lemmas_{outfilename}"
+        sentence_file = f"sentences_{outfilename}"
+
+        pathname = outfilename.replace(".txt", "")
+        new_path = f"{pathname}_files"
+
+        os.makedirs(new_path, exist_ok=True)
+
+        pos_path = os.path.join(new_path, pos_file)
+        lemma_path = os.path.join(new_path, lemma_file)
+        sentence_path = os.path.join(new_path, sentence_file)
+
+        with open(pos_path, 'w', encoding='utf-8') as p:
+            p.write(pos_tagged)
+        with open(lemma_path, 'w', encoding='utf-8') as l:
+            l.write(lemmas)
+        with open(sentence_path, 'w', encoding='utf-8') as s:
+            s.write(sentences_out)
+        
+        pos_tokens = pos_tagged.split()
+        lemma_tokens = lemmas.split()
+
+        csv_header = [['Index', 'Sentence_index', 'Sentence', 'POS_Tagged_Tokens', 'Lemmas']]
+
+        sentence_index = 1
+        sentences_left = list(sentences)
+        sentence_text = sentences_left.pop(0) if sentences_left else ""
+        sentence_tokens = word_tokenize(sentence_text)
+        is_new_sentence = True
+
+        sentence_id = sentence_index
+        sentence_token_index = 0
+        token_stream = zip(pos_tokens, lemma_tokens)
+        for i, (pos, lemma) in enumerate(token_stream):
+            
+            sentence_content = ""
+
+            if not sentence_tokens:
+                sentence_index += 1
+                sentence_id = sentence_index
+
+                if sentences_left:
+                    sentence_text = sentences_left.pop(0)
+                    sentence_tokens = word_tokenize(sentence_text)
+                    
+                else:
+                    sentence_text = ""
+
+                sentence_content = sentence_text
+            
+            if sentence_tokens:
+                sentence_tokens.pop(0)
+            else:
+                sentence_content = ""
+            csv_header.append([
+                i+1,
+                sentence_id,    
+                sentence_content,
+                pos,
+                lemma
+            ])
+           
+
+        csv_filename = f"{pathname}_metadata.csv"
+        csv_path = os.path.join(new_path, csv_filename)
+        with open(csv_path, 'w', newline='', encoding='utf-8') as c:
+
+            writer = csv.writer(c)
+            writer.writerows(csv_header)
+
+        print(f"Saved all annotated files to {new_path}")
+        print(f"Saved metadata to {csv_path}")
+            
+        return pos_path, lemma_path, sentence_path, csv_path
 
 
     #primary function of class, uses all other functions and returns a tuple of all the parsed types in corpus:
-    def encorporate(self ,rawtext):
+    def encorporate(self ,fullrawtext):
+
+        rawtext = fullrawtext.replace('*', '').strip()
+
         sentences = self.parse_sentence(rawtext)
         raw_tokens = self.parse_tokens(rawtext)
         #to remove '*', which LLM's seem to love:
-        tokens = []
-        for t in raw_tokens:
+        tokens = list(raw_tokens)
+        #for t in raw_tokens:
             #remove standalone '*'
-            if t == '*':
-                continue
+        #    if t == '*':
+        #        continue
             
             #remove '*' attached to words:
-            clean = t.strip('*')
+        #    clean = t.strip('*')
 
             #if anything left after cleaning, append:
-            if clean:
-                tokens.append(clean)
+        #    if clean:
+        #        tokens.append(clean)
 
         lower_tokens = [w.lower() for w in tokens]
         lemmatizer = WordNetLemmatizer()

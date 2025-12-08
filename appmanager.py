@@ -35,6 +35,7 @@ class AppManager:
         print("5. Load file to analyze") #adapted to have .csv and .txt
         print("6. Load Master Corpus")
         print("7. Parse Chat Logs into separate prompt/response files")
+        print("8. Parse Annotated Corpus into POS, Lemma, Sentence, Metadata")
         choice = input("Enter selection: ")
 
         #maybe return choice here and have functions for each option? 
@@ -84,7 +85,7 @@ class AppManager:
         elif choice == '7':
             parser = Encorporator()
             choose = input(
-                "Enter [1] to enter filename, " \
+                "\nEnter [1] to enter filename, " \
                 "\nEnter [2] to choose from list of .txt files in directory" \
                 "\nEnter [3] to search in a subfolder")
             while True:
@@ -115,6 +116,28 @@ class AppManager:
             #returns just the llm language file for analysis
             #no csv because this is parsing from old chats, we could update to accomodate though:
             return llm_responses
+        elif choice == '8':
+            parser = Encorporator()
+            choose = input(
+                "Enter [1] to enter filename, " \
+                "\nEnter [2] to choose from list of .txt files in directory" \
+                "\nEnter [3] to search in a subfolder")
+            while True:
+                if choose == '1':
+                    infile = input("Enter filename: ")
+                    break
+                elif choose == '2':
+                    infile = self.load_file("txt")
+                    break
+                elif choose == '3':
+                    folder = input("\nEnter subfolder name: ")
+                    infile = self.load_file("txt", folder)
+                    break
+                else:
+                    print("invalid input, please enter '1' or '2': ")
+                
+            parser.parse_annotated(infile)
+            return None
 
         else:
             print("invalid input, please enter a number from the list of options ")
@@ -143,7 +166,7 @@ class AppManager:
 
         #loop to select from the list of files in directory by their index, loops until 'x' or valid file choice:
         while True:
-            num = input("\nEnter the number of the file you want to load for analysis, or enter 'x' to exit: ").strip()
+            num = input("\nEnter the number of the file you want to load for analysis, or enter 'x' to exit: ")
 
             if num.lower() == 'x':
                 return None
@@ -225,14 +248,19 @@ class AppManager:
                 else:
                     print("invalid input, please enter a number from the list: ")
         else:
-        #rawtext from .txt:
-            try:
-                with open(filename, 'r', encoding='utf-8') as file:
-                    rawtext = file.read()
-            except FileNotFoundError:
-                print(f"could not locate file to load")
-            except IOError as e:
-                print(f"Error: could not read data from file: {filename}; error: {e}")
+        #rawtext from .txt, udated encodings to handle older files not encoded with 'utf-8':
+            encodings = [('utf-8', 'replace'), ('cp1254', 'replace'), ('latin-1', 'strict')]
+            
+            for encoding, error in encodings:
+                try:
+                    with open(filename, 'r', encoding=encoding, errors=error) as file:
+                        rawtext = file.read()
+                except UnicodeDecodeError:
+                    continue
+                except FileNotFoundError:
+                    print(f"could not locate file to load")
+                except IOError as e:
+                    print(f"Error: could not read data from file: {filename}; error: {e}")
 
         #basic corpus created from raw text, broken down into its parts:
         corpus = encorporator_a.encorporate(rawtext)
