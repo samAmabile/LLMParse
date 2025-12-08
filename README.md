@@ -14,7 +14,7 @@ LLM Language Analysis and Corpus Creation Tool
 * **llm_access_surplus.py** holds access to DeepSeek and GPT
 * **appmanager.py** holds the AppManager class with all user interface, main menus
 * **requirements.py** has all requirements/dependencies, updated to include scikit-learn, panda
-* **/sample files** has sample files generated from the program
+* **/sample files and /tests** have sample files generated from the program
 * **master_corpus.txt** now has only LLM generated content, and is updated with every chat
 * **master_prompts.txt** holds a log of all prompts. 
 * **master_chat_log.txt** what was previously master_corpus.txt, now has the entire running log of chats, with both prompt and response and the identifier tags "USER" and "MODEL"/"ASSISTANT"
