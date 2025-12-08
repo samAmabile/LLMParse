@@ -7,7 +7,7 @@ LLM Language Analysis and Corpus Creation Tool
 
 ## File Breakdown 
 Some files are too large to view on Github.
-**Files:**
+\n**Files:**
 * **main.py** main file, calls to appmanager and initiates program
 * **encorporator.py** holds just the Encorporator class now
 * **llm_access.py** holds access to Gemini via GeminiChat and GeminiChatCloud. Has all the additional ML functions
