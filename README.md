@@ -16,7 +16,7 @@ Some files are too large to view on Github.
 * **requirements.py** has all requirements/dependencies, updated to include scikit-learn, panda
 * **/sample files and /tests** have sample files generated from the program
 * **/master_annotated_corpus_files** has annotated corpus containing a file of each for POS tagged tokens, lemmas, and sentences, plus a .csv of the three.
-* **/master_corpus.csv** csv in format [prompt, response, live/generated?, chat number] updated automatically with each new LLM interaction
+* **master_corpus.csv** csv in format [prompt, response, live/generated?, chat number] updated automatically with each new LLM interaction
 * **master_corpus.txt** now has only LLM generated content, and is updated with every chat
 * **master_prompts.txt** holds a log of all prompts. 
 * **master_chat_log.txt** what was previously master_corpus.txt, now has the entire running log of chats, with both prompt and response and the identifier tags "USER" and "MODEL"/"ASSISTANT"
