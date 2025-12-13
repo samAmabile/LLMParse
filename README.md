@@ -6,7 +6,7 @@ LLM Language Analysis and Corpus Creation Tool
 **LLM Parse** is a language analysis and corpus creation tool for LLM language analysis. It captures and parses the language of chats with LLM models for linguistic analysis of words, tokens, lemmas, word frequency, and sentiment using the NLTK library.
 
 ## File Breakdown 
-**For Jeremy** I have refactored the code so that the classes are in different files. 'main.py' is the main call to the program. I tried to get the most up-to-date version of your branch for all the relevant classes to presere everything you have been working on. 
+Some files are too large to view on Github.  
 **Files:**
 * **main.py** main file, calls to appmanager and initiates program
 * **encorporator.py** holds just the Encorporator class now
@@ -14,7 +14,9 @@ LLM Language Analysis and Corpus Creation Tool
 * **llm_access_surplus.py** holds access to DeepSeek and GPT
 * **appmanager.py** holds the AppManager class with all user interface, main menus
 * **requirements.py** has all requirements/dependencies, updated to include scikit-learn, panda
-* **/sample files** has sample files generated from the program
+* **/sample files and /tests** have sample files generated from the program
+* **/master_annotated_corpus_files** has annotated corpus containing a file of each for POS tagged tokens, lemmas, and sentences, plus a .csv of the three.
+* **master_corpus.csv** csv in format [prompt, response, live/generated?, chat number] updated automatically with each new LLM interaction
 * **master_corpus.txt** now has only LLM generated content, and is updated with every chat
 * **master_prompts.txt** holds a log of all prompts. 
 * **master_chat_log.txt** what was previously master_corpus.txt, now has the entire running log of chats, with both prompt and response and the identifier tags "USER" and "MODEL"/"ASSISTANT"
