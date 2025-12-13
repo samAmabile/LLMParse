@@ -1,6 +1,8 @@
 import openai
 from openai import OpenAI
 
+#features focused on Gemini, but these options will still work for live chatting:
+
 class DeepSeekChat:
     def __init__(self, API):
         self.client = self.connect_to_deepseek(API)
@@ -16,7 +18,7 @@ class DeepSeekChat:
         print("Connected to DeepSeek LLM")
         print("Type 'Exit' to exit")
         while True:
-            prompt = input("\nYou: ").strip()
+            prompt = input("\nYou: ")
 
             if prompt == "Exit":
                 break
@@ -35,9 +37,9 @@ class DeepSeekChat:
             ])
         
         #save the chat to both a new file, and append it to the master_corpus file:
-        chatname = input("Name Chat: ")
+        chatname = input("\nName Chat: ")
         filename = chatname+".txt" if not chatname.endswith(".txt") else chatname
-        with open(filename, 'w') as file, open("master_corpus.txt", 'a') as master:
+        with open(filename, 'w') as file, open("master_chat_log.txt", 'a') as master:
             for message in history:
                 role = message['role'].capitalize()
                 content = message['content']
@@ -78,7 +80,7 @@ class GPTChat:
         print("Type 'Exit' to terminate chat and save to file")
 
         while True:
-            prompt = input("\nYou: ").strip()
+            prompt = input("\nYou: ")
             if prompt == 'Exit':
                 break
             try:
@@ -100,7 +102,7 @@ class GPTChat:
         if (len(history) > 1):
             chatname = input("\nenter name for chat: ")
             filename = chatname+"txt" if not chatname.lower().endswith(".txt") else chatname
-            with open(filename, 'w') as file, open("master_corpus.txt", 'a') as master:
+            with open(filename, 'w') as file, open("master_chat_log.txt", 'a') as master:
                 for message in history:
                     role = message['role'].capitalize()
                     content = message['content']

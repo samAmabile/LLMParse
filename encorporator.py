@@ -2,6 +2,7 @@
 import csv
 import os
 import nltk
+import re
 from nltk.corpus import wordnet
 from nltk.corpus import genesis
 from nltk.stem import WordNetLemmatizer
@@ -320,3 +321,63 @@ class Encorporator:
         corpname = 'master_corpus.txt'
         with open(corpname, 'a') as file:
             file.write(rawtext + "\n****END CHAT****\n")
+
+    def get_keyword(self, keyword, tokens)->list:
+        kwics = []
+        for i, word in enumerate(tokens):
+            if word == keyword:
+                kwic = f"{tokens[i-1] if i > 0 else ''} [ {keyword} ] {tokens[i+1] if len(tokens)-1 > i else ''}"
+                kwics.append(kwic)
+        
+        return kwics
+
+    def get_regex(self, pattern, tokens):
+        regex = pattern
+        matches = []
+        for i, token in enumerate(tokens):
+            if re.search(regex, token):
+                match = f"{tokens[i-1] if i > 0 else ''} [ {token} ] {tokens[i+1] if len(tokens)-1 > i else ''}"
+                matches.append(match)
+
+        return matches
+
+    def get_lemma(self, target, tokens):
+
+        lower_tokens = [token.lower() for token in tokens]
+        tagged = pos_tag(lower_tokens)
+        lemmatizer = WordNetLemmatizer()
+        lemmas = [lemmatizer.lemmatize(word.strip(), self.get_pos(tag)) for word, tag in tagged]
+
+        target_lower = [target.lower()]
+        target_tagged = pos_tag(target_lower)
+        target_lemma = lemmatizer.lemmatize(target_tagged[0][0], self.get_pos(target_tagged[0][1]))
+
+        zipped = zip(tokens, lemmas)
+        matches = []
+
+        for i, (token, lemma) in enumerate(zipped):
+            if target_lemma == lemma:
+                match = f"{tokens[i-1] if i>0 else ''} [ {tokens[i]} ] {tokens[i+1] if len(tokens)-1 > i else ''}"
+                matches.append(match)
+        
+        return matches
+    
+    def get_kwic(self, pattern, tokens, regex=False, lemma=False):
+        if regex:
+            return self.get_regex(pattern, tokens)
+        elif lemma:
+            return self.get_lemma(pattern, tokens)
+        else:
+            return self.get_keyword(pattern, tokens)
+
+
+
+
+
+
+                
+            
+
+            
+
+        

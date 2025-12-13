@@ -7,6 +7,7 @@ import os
 import nltk
 import random
 import pandas as pd
+from collections.abc import Iterable
 from nltk.corpus import brown
 
 nltk.download('brown')
@@ -36,6 +37,7 @@ class AppManager:
         print("6. Load Master Corpus")
         print("7. Parse Chat Logs into separate prompt/response files")
         print("8. Parse Annotated Corpus into POS, Lemma, Sentence, Metadata")
+        
         choice = input("Enter selection: ")
 
         #maybe return choice here and have functions for each option? 
@@ -121,10 +123,10 @@ class AppManager:
             choose = input(
                 "Enter [1] to enter filename, " \
                 "\nEnter [2] to choose from list of .txt files in directory" \
-                "\nEnter [3] to search in a subfolder")
+                "\nEnter [3] to search in a subfolder: ")
             while True:
                 if choose == '1':
-                    infile = input("Enter filename: ")
+                    infile = input("\nEnter filename: ")
                     break
                 elif choose == '2':
                     infile = self.load_file("txt")
@@ -181,6 +183,26 @@ class AppManager:
     #checks for path, makes folder if path nonexistent:
     def verify_path(self, folder):
         os.makedirs(folder, exist_ok=True)
+
+    def save_to_file(self, content, delimiter, path, filename, append=False):
+        if path:
+            self.verify_path(path)
+            outfilename = os.path.join(path, filename)
+        else:
+            outfilename = filename
+
+        write = 'a' if append else 'w'
+
+        if isinstance(content, str):
+            outstring = content
+        elif isinstance(content, Iterable):
+            outstring = delimiter.join(content)
+        else:
+            outstring = str(content)
+        with open(outfilename, write, encoding='utf-8') as f:
+            f.write(outstring)
+
+        return outfilename
 
     def main_loop(self):
         filenames = self.MainMenu()
@@ -279,7 +301,8 @@ class AppManager:
             print("3. Run Senitment Analysis")
             print("4. Print file as corpus (Lemmas, POS Tagged Tokens, List of Sentences)")
             print("5. Compare to another corpus")
-            print("6. Exit")
+            print("6. Search for a keyword, lemma, or by regular expression")
+            print("7. Exit")
 
             choice = input("\nEnter your choice: ")
 
@@ -567,8 +590,38 @@ class AppManager:
                     file.write("\n".join(file_output))
 
                 print(f"Comparison Analysis Saved to: {path}") 
-                    
-            elif choice in ['6', 'Exit', 'exit']:
+            
+            elif choice == '6':
+
+                searchtype = input("[1] search for keyword" \
+                                 "\n[2] search by regular expression" \
+                                 "\n[3] search for all lemmas of keyword" \
+                                 "\n Enter choice: ")
+                regex = True if searchtype == '2' else False
+                lemma = True if searchtype == '3' else False
+                pattern = input("\nEnter search term: ")
+                matches = encorporator_a.get_kwic(pattern, tokens, regex, lemma)
+                header = f"Keyword search for {pattern} in {filename}: "
+                content = [header]
+                print(header)
+                for i, match in enumerate(matches):
+                    print(f"{i}: {match}")
+                    content.append(f"{i}: {match}")
+                
+                save = input("\nSave to file? y/n: ")
+
+                if save.lower() == 'y':
+                    outfile = input("\Save as: ")
+                    exist = input("\nAre you appending an existing file? y/n: ")
+                    path = ANALYSIS_FOLDER
+                    delimiter = "\n"
+                    append = True if exist.lower() == 'y' else False
+                    saved = self.save_to_file(content, delimiter, path, outfile, append)
+                    print(f"Search results saved to {saved}")
+                elif save.lower() == 'n':
+                    print("returning to analysis menu")
+                
+            elif choice in ['7', 'Exit', 'exit']:
                 print("exiting...")
                 return
             else:
