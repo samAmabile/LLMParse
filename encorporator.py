@@ -12,13 +12,16 @@ from nltk.text import Text
 from nltk.tag import pos_tag
 from nltk.probability import FreqDist
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
-
+from nltk.collocations import BigramCollocationFinder
+from nltk.metrics import BigramAssocMeasures
+from nltk.corpus import stopwords
 
 nltk.download('punkt')
 nltk.download('wordnet')
 nltk.download('averaged_perceptron_tagger')
 nltk.download('vader_lexicon')
 nltk.download('brown')
+nltk.download('stopwords')
 
 #pats to save smaller corpora:
 TESTS_FOLDER = "tests"
@@ -322,6 +325,7 @@ class Encorporator:
         with open(corpname, 'a') as file:
             file.write(rawtext + "\n****END CHAT****\n")
 
+    #search keyword, returns word before and word after for every match in the list of tokens:
     def get_keyword(self, keyword, tokens)->list:
         kwics = []
         for i, word in enumerate(tokens):
@@ -331,6 +335,7 @@ class Encorporator:
         
         return kwics
 
+    #searches for keyword by regex, gives one word before one word after:
     def get_regex(self, pattern, tokens):
         regex = pattern
         matches = []
@@ -341,6 +346,7 @@ class Encorporator:
 
         return matches
 
+    #searches for the lemma of the provided keyword in the lemmatized list of tokens, and returns the non-lemmatized version as result:
     def get_lemma(self, target, tokens):
 
         lower_tokens = [token.lower() for token in tokens]
@@ -362,6 +368,7 @@ class Encorporator:
         
         return matches
     
+    #combines all keyword search types into one function call:
     def get_kwic(self, pattern, tokens, regex=False, lemma=False):
         if regex:
             return self.get_regex(pattern, tokens)
@@ -370,6 +377,74 @@ class Encorporator:
         else:
             return self.get_keyword(pattern, tokens)
 
+    #search for phrase in list of sentences:
+    def get_keyphrase(self, target, sentences):
+        phrases = []
+        for i, sentence in enumerate(sentences):
+            if target in sentence:
+                phrase = f"{i}: {sentence}"
+                phrases.append(phrase)
+
+        return phrases
+    
+    #uses regex to search the sentence list:
+    def get_regexphrase(self, pattern, sentences):
+        phrases = []
+        for i, sentence in enumerate(sentences):
+            if re.search(pattern, sentence):
+                phrase = f"{i}: {sentence}"
+                phrases.append(phrase)
+        
+        return phrases
+    
+    #lemmatizes the phrase searched for, and then matches it against lemmatized sentences in the list being searched:
+    def get_lemmasphrase(self, target, sentences):
+        phrases = []
+        lemmatizer = WordNetLemmatizer()
+        target_list = target.split(' ')
+        punctuation = ".?!"
+        target_cleaned = [word.strip(punctuation) for word in target_list]
+        target_lower = [word.lower() for word in target_cleaned]
+        target_tagged = pos_tag(target_lower)
+        target_lemmas = [lemmatizer.lemmatize(word.strip(), self.get_pos(tag)) for word, tag in target_tagged]
+        header = f"Lemmatization of '{target}': {' '.join(target_lemmas)}"
+        phrases.append(header)
+        for i, sentence in enumerate(sentences):
+            sentence_list = sentence.split(' ')
+            sentence_cleaned = [word.strip(punctuation) for word in sentence_list]
+            sentence_lower = [word.lower() for word in sentence_cleaned]
+            sentence_tagged = pos_tag(sentence_lower)
+            sentence_lemmas = [lemmatizer.lemmatize(word.strip(), self.get_pos(tag)) for word, tag in sentence_tagged]
+            if sentence_lemmas == target_lemmas:
+                phrase = f"{i}: {sentence}"
+                phrases.append(phrase)
+        
+        return phrases
+     
+    #combines all search types to one function call:
+    def search_phrase(self, pattern, sentences, regex=False, lemmas=False):
+        if regex:
+            return self.get_regexphrase(pattern, sentences)
+        elif lemmas:
+            return self.get_lemmasphrase(pattern, sentences)
+        else:
+            return self.get_keyphrase(pattern, sentences)
+
+    
+    def get_collocations(self, word, tokens, N, minimum=0):
+
+        finder = BigramCollocationFinder.from_words(tokens)
+
+        finder.apply_freq_filter(minimum)
+
+        finder.apply_word_filter(lambda w: w in stopwords.words('english'))
+        finder.apply_ngram_filter(lambda word1, word2: word1 != word and word2 != word)
+
+        collocations = finder.nbest(BigramAssocMeasures.pmi, N)
+
+        return collocations
+
+        
 
 
 

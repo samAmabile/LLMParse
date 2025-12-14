@@ -302,7 +302,9 @@ class AppManager:
             print("4. Print file as corpus (Lemmas, POS Tagged Tokens, List of Sentences)")
             print("5. Compare to another corpus")
             print("6. Search for a keyword, lemma, or by regular expression")
-            print("7. Exit")
+            print("7. Search for a phrase")
+            print("8. Search for top N collocations of a word")
+            print("9. Exit")
 
             choice = input("\nEnter your choice: ")
 
@@ -620,8 +622,68 @@ class AppManager:
                     print(f"Search results saved to {saved}")
                 elif save.lower() == 'n':
                     print("returning to analysis menu")
+            
+            elif choice == '7':
+
+                searchtype = input("[1] search for phrase" \
+                                 "\n[2] search by regular expression" \
+                                 "\n[3] search phrase as lemmas (returns all lemma combinations that match your query, i.e. 'i am' returns 'i be' etc.)" \
+                                 "\nEnter choice:  ")
+                regex = True if searchtype == '2' else False
+                lemma = True if searchtype == '3' else False
                 
-            elif choice in ['7', 'Exit', 'exit']:
+                pattern = input("\nSearch: ")
+                matches = encorporator_a.search_phrase(pattern, sentences, regex, lemma)
+                header = f"Phrase search for {pattern} in {filename}"
+                content = [header]
+                print(header)
+                for i, match in enumerate(matches):
+                    print(f"{i}: {match}")
+                    content.append(f"{i}: {match}")
+                
+                save = input("\nSave to file? y/n: ")
+
+                if save.lower() == 'y':
+                    outfile = input("\nSave as: ")
+                    exist = input("\nAre you appending an existing file? y/n: ")
+                    append = True if exist.lower() == 'y' else False
+                    delimiter = "\n"
+                    path = ANALYSIS_FOLDER
+                    saved = self.save_to_file(content, delimiter, path, outfile, append)
+                    print(f"Search results saved to {saved}")
+                elif save.lower() == 'n':
+                    print("returning to analysis menu")
+
+            elif choice == '8':
+
+                searchterm = input("\nEnter word to search collocations: ")
+                num_collocations = input("Enter the number of collocations (i.e. for top 10 collocations, enter 10): ")
+                N = int(num_collocations) if num_collocations.isdigit() else 10
+                minimum = input("Enter number to filter collocations that appear less than that many times, or enter '0' for no filter: ")
+                filt = int(minimum) if minimum.isdigit() else 0
+                punctuation_filter = ['.', ',', ':', '(', ')', '#']
+                words_only = [w for w in tokens if w not in punctuation_filter]
+                collocations = encorporator_a.get_collocations(searchterm, words_only, N, filt)
+
+                header = f"Top {N} collocations of {searchterm} in {filename}: "
+                content = [header]
+                print(header)
+                for i, (a, b) in enumerate(collocations):
+                    print(f"{i}: {a} {b}")
+                    content.append(f"{i}: {a} {b}")
+                
+                save = input("\nSave to file? y/n: ")
+                if save == 'y':
+                    outfile = input("\nSave as: ")
+                    exist = input("\nAre you appending an existing file? y/n: ")
+                    append = True if exist.lower() == 'y' else False
+                    delimiter = "\n"
+                    path = ANALYSIS_FOLDER
+                    saved = self.save_to_file(content, delimiter, path, outfile, append)
+                    print(f"Collocations saved to: {saved}")
+                elif save.lower() == 'n':
+                    print("returning to analysis menu")
+            elif choice in ['9', 'Exit', 'exit']:
                 print("exiting...")
                 return
             else:
