@@ -37,6 +37,7 @@ class AppManager:
         print("6. Load Master Corpus")
         print("7. Parse Chat Logs into separate prompt/response files")
         print("8. Parse Annotated Corpus into POS, Lemma, Sentence, Metadata")
+        print("9. fix master_annotated_corpus_metadata.csv indexing")
         
         choice = input("Enter selection: ")
 
@@ -140,7 +141,15 @@ class AppManager:
                 
             parser.parse_annotated(infile)
             return None
+        elif choice == '9':
+            parser = Encorporator()
+            filename = "./master_annotated_corpus_files/master_annotated_corpus_metadata.csv"
 
+            fixedfile_df = parser.fix_csv_indexing(filename)
+
+            print(fixedfile_df.head())
+
+            return None
         else:
             print("invalid input, please enter a number from the list of options ")
               

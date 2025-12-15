@@ -3,6 +3,9 @@ import csv
 import os
 import nltk
 import re
+
+import pandas as pd
+import numpy as np
 from nltk.corpus import wordnet
 from nltk.corpus import genesis
 from nltk.stem import WordNetLemmatizer
@@ -213,6 +216,7 @@ class Encorporator:
 
         pathname = outfilename.replace(".txt", "")
         new_path = f"{pathname}_files"
+        master = "master_annotated_corpus_files"
 
         os.makedirs(new_path, exist_ok=True)
 
@@ -220,12 +224,30 @@ class Encorporator:
         lemma_path = os.path.join(new_path, lemma_file)
         sentence_path = os.path.join(new_path, sentence_file)
 
-        with open(pos_path, 'w', encoding='utf-8') as p:
+        with open(pos_path, 'a', encoding='utf-8') as p:
             p.write(pos_tagged)
-        with open(lemma_path, 'w', encoding='utf-8') as l:
+        with open(lemma_path, 'a', encoding='utf-8') as l:
             l.write(lemmas)
-        with open(sentence_path, 'w', encoding='utf-8') as s:
+        with open(sentence_path, 'a', encoding='utf-8') as s:
             s.write(sentences_out)
+
+        if new_path != master:
+            os.makedirs(master, exist_ok=True)
+            master_basename = "master_annotated_corpus.txt"
+            master_pos_file = f"pos_{master_basename}"
+            master_lemma_file = f"lemmas_{master_basename}"
+            master_sentence_file = f"sentences_{master_basename}"
+            master_pos_path = os.path.join(master, master_pos_file)
+            master_lemma_path = os.path.join(master, master_lemma_file)
+            master_sentence_path = os.path.join(master, master_sentence_file)
+
+            with open(master_pos_path, 'a', encoding='utf-8') as mp:
+                mp.write(pos_tagged)
+            with open(master_lemma_path, 'a', encoding='utf-8') as ml:
+                ml.write(lemmas)
+            with open(master_sentence_path, 'a', encoding='utf-8') as ms:
+                ms.write(sentences_out)
+
         
         pos_tokens = pos_tagged.split()
         lemma_tokens = lemmas.split()
@@ -282,6 +304,122 @@ class Encorporator:
         print(f"Saved metadata to {csv_path}")
             
         return pos_path, lemma_path, sentence_path, csv_path
+
+    #def parse_annotated_string(self, content):
+    def fix_csv_indexing(self, filename):
+        filepath = filename
+
+        try:
+            df = pd.read_csv(filepath)
+        except FileNotFoundError:
+            print(f"could not open/find file {filename}")
+            return pd.DataFrame()
+
+        tagged_tokens = df['POS_Tagged_Tokens']
+        sentences = df['Sentence']
+        #index = df['Index']
+        sentence_start_indices = df[sentences.str.strip() != ''].index
+        #sentences_list = sentences.dropna()
+
+        tokens = tagged_tokens.str.split('[', expand=True)[0].str.lower().fillna('')
+
+        aligned_id = []
+        misaligned_id = []
+
+        for i in sentence_start_indices:
+
+            current_sentence = str(sentences.loc[i]).strip()
+            try:
+                first_token_raw = current_sentence.split(maxsplit=1)[0].lower()
+
+                if "'" in first_token_raw:
+                    first_token_raw = first_token_raw.split("'")[0]
+
+                if first_token_raw.endswith('.'):
+                    has_period = '.' in first_token_raw[:-1]
+
+                    if has_period:
+                        first_token = first_token_raw
+                    else:
+                        first_token = first_token_raw.rstrip('.')
+                elif first_token_raw.endswith(','):
+                    first_token = first_token_raw.rstrip(',')
+                elif first_token_raw.endswith(':'):
+                    first_token = first_token_raw.rstrip(':')
+                else:
+                    first_token = first_token_raw
+                
+            except IndexError:
+                continue
+
+            actual_token = tokens.loc[i]
+
+            if first_token != actual_token:
+                misaligned_id.append(i)
+            else:
+                aligned_id.append(i)
+
+        corrected_column_name = 'corrected_sentece_TEMP'
+        df[corrected_column_name] = df['Sentence'].copy()
+
+        min_idx = df.index.min()
+        max_idx = df.index.max()
+
+        for j in misaligned_id:
+
+            cur_sentence = str(df.loc[j, 'Sentence']).strip()
+
+            try:
+                first_token_raw = cur_sentence.split(maxsplit=1)[0].lower()
+
+                if "'" in first_token_raw:
+                    first_token_raw = first_token_raw.split("'")[0]
+
+                if first_token_raw.endswith('.'):
+                    has_period = '.' in first_token_raw[:-1]
+
+                    if has_period:
+                        first_token = first_token_raw
+                    else:
+                        first_token = first_token_raw.rstrip('.')
+                elif first_token_raw.endswith(','):
+                    first_token = first_token_raw.rstrip(',')
+                elif first_token_raw.endswith(':'):
+                    first_token = first_token_raw.rstrip(':')
+                else:
+                    first_token = first_token_raw
+                
+            except IndexError:
+                continue
+
+            if j > min_idx:
+                previous_token = tokens.loc[j-1]
+                if first_token == previous_token:
+                    df.loc[j-1, corrected_column_name] = cur_sentence
+                    df.loc[j, corrected_column_name] = ''
+                    continue
+            
+            if j < max_idx:
+                next_token = tokens.loc[j+1]
+                if first_token == next_token:
+                    df.loc[j+1, corrected_column_name] = cur_sentence
+                    df.loc[j, corrected_column_name] = ''
+                    continue
+            
+        df = df.drop(columns=['Sentence'])
+        df = df.rename(columns={corrected_column_name: 'Sentence'})
+
+        columns_order = ['Index', 'Sentence_index', 'Sentence', 'POS_Tagged_Tokens', 'Lemmas']
+
+        df = df[columns_order]
+
+        outfilename = "./master_annotated_corpus_files/mamaf.csv"
+
+        df.to_csv(outfilename, index=False)
+
+        print(f"\nCorrection complete: {len(misaligned_id)} lines corrected. Saved as: {outfilename}")
+
+        return df
 
 
     #primary function of class, uses all other functions and returns a tuple of all the parsed types in corpus:
