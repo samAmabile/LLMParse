@@ -310,10 +310,11 @@ class AppManager:
             print("3. Run Senitment Analysis")
             print("4. Print file as corpus (Lemmas, POS Tagged Tokens, List of Sentences)")
             print("5. Compare to another corpus")
-            print("6. Search for a keyword, lemma, or by regular expression")
+            print("6. Search for a concordance by keyword, lemma, or by regular expression")
             print("7. Search for a phrase")
             print("8. Search for top N collocations of a word")
-            print("9. Exit")
+            print("9. Search for similar words (by context)")
+            print("10. Exit")
 
             choice = input("\nEnter your choice: ")
 
@@ -692,7 +693,26 @@ class AppManager:
                     print(f"Collocations saved to: {saved}")
                 elif save.lower() == 'n':
                     print("returning to analysis menu")
-            elif choice in ['9', 'Exit', 'exit']:
+            elif choice == '9':
+                word = input("\nEnter word to search for similar: ")
+                similar, scores = encorporator_a.get_similar(word, tokens)
+
+                header = "Top 10 most similar words to {word} in {filename}: "
+                content = [header]
+                print("Top 10 most similar words: ")
+                for word, score in scores:
+                    print(f"{word}, similarity score: {score}")
+                    content.append(f"{word}; similarity score: {score}")
+
+                save = input("\nSave to file? y/n: ")
+                if save.lower() == 'y':
+                    outfile = input("\nSave as: ")
+                    exists = input("Are you appending an existing file? y/n: ")
+                    append = True if exists.lower() == 'y' else False
+                    outfilename = self.save_to_file(content, '\n', ANALYSIS_FOLDER, outfile, append)
+                    print(f"Analysis saved to {outfilename}")
+
+            elif choice in ['10', 'Exit', 'exit']:
                 print("exiting...")
                 return
             else:

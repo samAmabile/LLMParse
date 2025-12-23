@@ -12,6 +12,7 @@ from nltk.stem import WordNetLemmatizer
 from nltk.tokenize import word_tokenize
 from nltk.tokenize import sent_tokenize
 from nltk.text import Text
+from nltk.text import ContextIndex
 from nltk.tag import pos_tag
 from nltk.probability import FreqDist
 from nltk.sentiment.vader import SentimentIntensityAnalyzer
@@ -581,10 +582,20 @@ class Encorporator:
         collocations = finder.nbest(BigramAssocMeasures.pmi, N)
 
         return collocations
+    
+    def get_similar(self, word, tokens):
+
+        index = ContextIndex(tokens)
+        scores = index.word_similarity_dict(word)
+        sorted_scores = sorted(scores.items(), key=lambda item: item[1], reverse=True)
+        top_10 = sorted_scores[1:6]
+        similar = index.similar_words(word)
+
+        return similar, top_10
+
+
 
         
-
-
 
 
 
