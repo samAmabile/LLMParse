@@ -2,6 +2,8 @@ import requests
 import json
 import csv
 import os
+import random
+import time
 
 from google import genai
 from google.genai import types
@@ -458,3 +460,55 @@ class GeminiChatCloud:
         print(f"Aggregate of prompt,response saved to: {csvfile}")
 
         return csvfile, llm_content
+    
+    def automated_chat_loop(self, topics, turns=10):
+        topic = random.choice(topics)
+        icebreaker = f"Let's have a conversation about {topic}, you start"
+
+        history_a = []
+        history_b = []
+
+        prompt = icebreaker
+
+        for turn in range(turns):
+            
+            is_bot_a = (turn%2==0)
+            current_bot = "BOT_A" if is_bot_a else "BOT_B"
+
+            payload = {
+                "prompt": prompt, 
+                "history": history_a if is_bot_a else history_b
+            }
+
+            try:
+                response = requests.post(
+                    self.url,
+                    headers={"Content-Type": "application/json"}, 
+                    data=json.dumps(payload),
+                    timeout=60
+                )
+                response.raise_for_status()
+                reply = response.json().get('response')
+
+                print(f"\n[{current_bot}]: [{reply}]")
+
+                context = history_a if is_bot_a else history_b
+                context.append({"role": "user", "content": prompt})
+                context.append({"role": "assistant", "content": reply})
+
+                self.history.append({"role": current_bot, "content": reply})
+
+                prompt = reply
+
+                time.sleep(1)
+            except Exception as e:
+                print(f"Bot convo breakdown at {turn}: {e}")
+
+        
+        filename = self.write_to_csv_cloud(live=1, tag="")
+
+        return filename
+
+
+
+

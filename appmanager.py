@@ -68,10 +68,21 @@ class AppManager:
             return filename
         
         elif choice == '4':
-            uri = "https://us-central1-parsellm.cloudfunctions.net/gemini-proxy"
-            geminichatcloud = GeminiChatCloud(uri)
-            filename = geminichatcloud.chat_loop()
-            return filename
+            man_or_auto = input("\nEnter [1] to chat manually, [2] to automate a conversation between two bots, " \
+                                "Enter choice: ")
+            if man_or_auto == '1':
+                uri = "https://us-central1-parsellm.cloudfunctions.net/gemini-proxy"
+                geminichatcloud = GeminiChatCloud(uri)
+                filename = geminichatcloud.chat_loop()
+                return filename
+            elif man_or_auto == '2':
+
+                topics = ["theoretical physics", "linguistics", "current events", "automation", "capitalism vs socialism", "the ideas of Nietszche"]
+                uri = "https://us-central1-parsellm.cloudfunctions.net/gemini-proxy"
+                geminichatcloud = GeminiChatCloud(uri)
+                filename = geminichatcloud.automated_chat_loop(topics)
+                return filename
+
         
         #updated to search for both txt and csv: 
         elif choice == '5':
