@@ -334,6 +334,33 @@ class GeminiChatCloud:
         self.url = cloud_uri
         self.history = []
 
+    def _cloud_connect(self, prompt, history=None, role=None):
+
+        payload = {"prompt": prompt}
+
+        if role:
+            payload["role_instruction"] = f"you are a {role}, stay in character"
+        
+        if history:
+            formatted_history = []
+            for message in history:
+                r = "user" if message['role'].lower() == "user" else "model"
+                formatted_history.append({
+                    "role": r,
+                    "parts": [{"text": message['content']}]
+                })
+            payload["history"] = formatted_history
+        
+        response = requests.post(
+            self.url, 
+            headers={"Content-Type": "application/json"},
+            data=json.dumps(payload),
+            timeout=60
+        )
+        
+        response.raise_for_status()
+        return response.json().get('response')
+    
     def verify_path_cloud(self, folder):
         os.makedirs(folder, exist_ok=True)
 
@@ -388,29 +415,31 @@ class GeminiChatCloud:
                 break
             
             try:
-                payload = {"prompt": prompt}
 
-                response = requests.post(
-                    self.url, 
-                    headers={"Content-Type": "application/json"},
-                    data=json.dumps(payload),
-                    timeout=60
-                )
+                reply = self._cloud_connect(prompt, history=self.history)
+                #payload = {"prompt": prompt}
 
-                response.raise_for_status()
+                #response = requests.post(
+                #    self.url, 
+                #    headers={"Content-Type": "application/json"},
+                #    data=json.dumps(payload),
+                #    timeout=60
+                #)
 
-                response_data = response.json()
-                gemini_reply = response_data.get('response', 'Error: Proxy returned invalid format.')
+                #response.raise_for_status()
 
-                print(f"\nGemini: {gemini_reply}")
+                #response_data = response.json()
+                #gemini_reply = response_data.get('response', 'Error: Proxy returned invalid format.')
+
+                print(f"\nGemini: {reply}")
 
                 self.history.append({"role": "user", "content": prompt})
-                self.history.append({"role": "assistant", "content": gemini_reply})
+                self.history.append({"role": "model", "content": reply})
             
-            except requests.exceptions.HTTPError as errh:
-                print(f"HTTP Error: {errh}")
-                print(f"Proxy Response is: {response.text}")
-                break
+            #except requests.exceptions.HTTPError as errh:
+            #    print(f"HTTP Error: {errh}")
+            #    print(f"Proxy Response is: {response.text}")
+            #    break
             except requests.exceptions.ConnectionError as errc:
                 print(f"Connection Error: {errc}")
                 break
@@ -420,9 +449,9 @@ class GeminiChatCloud:
             except requests.exceptions.RequestException as err:
                 print(f"Unknown Error Happened: {err}")
                 break
-            except json.JSONDecodeError:
-                print(f"could not decode content of JSON response from the proxy. Response was: {response.text}")
-                break
+            #except json.JSONDecodeError:
+             #   print(f"could not decode content of JSON response from the proxy. Response was: {response.text}")
+             #   break
             except Exception as e:
                 print("API connection timed out: {e}")
                 break
@@ -465,36 +494,44 @@ class GeminiChatCloud:
         topic = random.choice(topics)
         icebreaker = f"Let's have a conversation about {topic}, you start"
 
-        history_a = []
-        history_b = []
+        #history_a = []
+        #history_b = []
+        contexts = {"BOT_A": [], "BOT_B": []}
 
         prompt = icebreaker
+
+        print(f"----Conversation initiated between two agreeable bots----")
+        print(f"---------------------------------------------------------")
 
         for turn in range(turns):
             
             is_bot_a = (turn%2==0)
             current_bot = "BOT_A" if is_bot_a else "BOT_B"
 
-            payload = {
-                "prompt": prompt, 
-                "history": history_a if is_bot_a else history_b
-            }
+            #payload = {
+            #    "prompt": prompt, 
+            #    "history": history_a if is_bot_a else history_b
+            #}
 
             try:
-                response = requests.post(
-                    self.url,
-                    headers={"Content-Type": "application/json"}, 
-                    data=json.dumps(payload),
-                    timeout=60
-                )
-                response.raise_for_status()
-                reply = response.json().get('response')
+                #response = requests.post(
+                #    self.url,
+                #    headers={"Content-Type": "application/json"}, 
+                #    data=json.dumps(payload),
+                #    timeout=60
+                #)
+                #response.raise_for_status()
+                #reply = response.json().get('response')
 
-                print(f"\n[{current_bot}]: [{reply}]")
+                reply = self._cloud_connect(prompt, history=contexts[current_bot])
 
-                context = history_a if is_bot_a else history_b
-                context.append({"role": "user", "content": prompt})
-                context.append({"role": "assistant", "content": reply})
+                print(f"\n[{current_bot}]: {reply}")
+
+                #context = history_a if is_bot_a else history_b
+                #context.append({"role": "user", "content": prompt})
+                #context.append({"role": "model", "content": reply})
+                contexts[current_bot].append({"role": "user", "content": prompt})
+                contexts[current_bot].append({"role": "model", "content": reply})
 
                 self.history.append({"role": current_bot, "content": reply})
 
@@ -502,12 +539,57 @@ class GeminiChatCloud:
 
                 time.sleep(1)
             except Exception as e:
-                print(f"Bot convo breakdown at {turn}: {e}")
+                print(f"Bot convo breakdown at turn {turn} of {turns}: {e}")
 
-        
+        print("----------------Conversation Complete---------------------------")
         filename = self.write_to_csv_cloud(live=1, tag="")
 
         return filename
+    
+    def automated_chat_loop_roles(self, topics, bot_a="stubborn proponent", bot_b="taciturn opponent", turns=6):
+        topic = random.choice(topics)
+        prompt = f"We are discussing {topic}. {bot_a}, please start."
+
+        contexts = {bot_a: [], bot_b: []}
+
+        print(f"----Conversation on {topic} initiated between {bot_a} and {bot_b}-----")
+        print("------------------------------------------------------------")
+        for turn in range(turns):
+            speaker = bot_a if turn%2==0 else bot_b
+
+            #payload = {
+             #   "prompt": prompt, 
+              #  "history": contexts[speaker], 
+               # "role_instruction": f"Act as a {speaker}"
+            #}
+            try:
+                #response = requests.post(self.url, json=payload, timeout=60)
+                #reply = response.json().get('response')
+                reply = self._cloud_connect(prompt, history=contexts[speaker], role=speaker)
+                
+                print(f"[{speaker}]: {reply}")
+
+                contexts[speaker].append({"role": "user", "content": prompt})
+                contexts[speaker].append({"role": "model", "content": reply})
+
+                self.history.append({"role": speaker, "content": reply})
+
+                prompt = reply
+            except Exception as e:
+                print(f"Bot convo breakdown at turn {turn} of {turns}: {e}")
+        
+        print(f"--------------------Conversation complete---------------------")
+
+        filename = self.write_to_csv_cloud(live=1, tag='')
+
+        return filename
+    
+
+
+
+        
+
+
 
 
 

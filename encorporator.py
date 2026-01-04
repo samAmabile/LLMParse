@@ -305,6 +305,162 @@ class Encorporator:
         print(f"Saved metadata to {csv_path}")
             
         return pos_path, lemma_path, sentence_path, csv_path
+    
+    def get_index(self, csv_filename):
+
+        if not os.path.exists(csv_filename):
+            return 0, 0
+        
+        with open(csv_filename, 'r', encoding='utf-8') as csv:
+            lines = csv.readlines()
+            if len(lines) < 1:
+                return 0, 0
+            
+            last_line = lines[-1].strip().split(',')
+
+            try:
+                line_index = int(last_line[0])
+                sentence_index = int(last_line[1])
+                return line_index, sentence_index
+            except (ValueError, IndexError):
+                return 0, 0
+    
+    def get_last_index(self, filename):
+        if not os.path.exists(filename) or os.path.getsize(filename)==0:
+            return 0
+    
+        last_index = 0
+        with open(filename, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+
+            for row in reader:
+                if row and row[0].isdigit():
+                    last_index = int(row[0])
+        return last_index
+            
+    #need to update  
+    def append_annotated(self, pos_tagged, lemmas, sentences):
+        path = "master_annotated_corpus_files"
+
+        lemma_file = os.path.join(path, "lemmas_master_annotated_corpus.txt")
+        pos_file = os.path.join(path, "pos_master_annotated_corpus.txt")
+        sentence_file = os.path.join(path, "sentences_master_annotated_corpus.txt")
+        meta_file = os.path.join(path, "master_annotated_corpus_metadata.csv")
+
+        with open(lemma_file, 'a', encoding='utf-8') as lf:
+            for i, lemma in enumerate(lemmas):
+                if i%10==0:
+                    lf.write('\n')
+                lf.write(f"{lemma} ")
+        with open(pos_file, 'a', encoding='utf-8') as pf:
+            for i, token in enumerate(pos_tagged):
+                if i%10==0:
+                    pf.write('\n')
+                pf.write(f"{token} ")
+        with open(sentence_file, 'a', encoding='utf-8') as sf:
+            sf.write('\n'.join(sentences))
+
+        metadata = []
+
+        indices = self.get_index(meta_file)
+        sentence_index = indices[1]
+        line_index = indices[0]
+        sentences_left = list(sentences)
+        sentence_text = sentences_left.pop(0) if sentences_left else ""
+        sentence_tokens = word_tokenize(sentence_text)
+
+        sentence_id = sentence_index
+        
+        token_stream = zip(pos_tagged, lemmas)
+        for i, (pos, lemma) in enumerate(token_stream, start=line_index):
+            
+            sentence_content = ""
+
+            if not sentence_tokens:
+                sentence_index += 1
+                sentence_id = sentence_index
+
+                if sentences_left:
+                    sentence_text = sentences_left.pop(0)
+                    sentence_tokens = word_tokenize(sentence_text)
+                    
+                else:
+                    sentence_text = ""
+
+                sentence_content = sentence_text
+            
+            if sentence_tokens:
+                sentence_tokens.pop(0)
+            else:
+                sentence_content = ""
+                metadata.append([
+                i+1,
+                sentence_id,    
+                sentence_content,
+                pos,
+                lemma
+            ])
+           
+
+        
+        with open(meta_file, 'a', newline='', encoding='utf-8') as c:
+
+            writer = csv.writer(c)
+            writer.writerows(metadata)
+
+        print(f"Saved metadata to {meta_file}")
+            
+        return meta_file
+        
+    def write_annotated_csv(self, sentences, filename):
+        append = False
+        if os.path.exists(filename):
+            append = True
+
+        
+        pos_sentences = []
+        lemmas_sentences = []
+
+        lemmatizer = WordNetLemmatizer()
+
+        for sentence in sentences:
+            tokens = word_tokenize(sentence)
+            lower_case = [token.lower() for token in tokens]
+            pos_for_lemmatizer = pos_tag(lower_case)
+            pos_tagged_tuples = pos_tag(tokens)
+            pos_tagged = [f"{word}[{tag}]" for word, tag in pos_tagged_tuples]
+            lemmas = [lemmatizer.lemmatize(word.strip(), self.get_pos(tag)) for word, tag in pos_for_lemmatizer]
+
+            pos_sentence = ' '.join(pos_tagged)
+            lemmas_sentence = ' '.join(lemmas)
+
+            pos_sentences.append(pos_sentence)
+            lemmas_sentences.append(lemmas_sentence)
+
+        write = 'a' if append else 'w'
+        columns = []
+        if not append:
+            columns = [["Index", "Sentence", "POS Tagged Tokens", "Lemmas"]]
+
+        start_index = self.get_last_index(filename)
+        j=0
+
+        for i, sentence in enumerate(sentences, start=start_index):
+            content = [
+                i,
+                sentence,
+                pos_sentences[j],
+                lemmas_sentences[j]
+            ]
+            columns.append(content)
+            j += 1
+
+
+        with open(filename, write, newline='', encoding='utf-8') as f:
+            writer = csv.writer(f)
+            writer.writerows(columns)
+
+        return filename
 
     #def parse_annotated_string(self, content):
     def fix_csv_indexing(self, filename):
@@ -414,7 +570,7 @@ class Encorporator:
 
         df = df[columns_order]
 
-        outfilename = "./master_annotated_corpus_files/mamaf.csv"
+        outfilename = "./master_annotated_corpus_files/master_annotated_corpus_metadata.csv"
 
         df.to_csv(outfilename, index=False)
 

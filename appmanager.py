@@ -77,11 +77,17 @@ class AppManager:
                 return filename
             elif man_or_auto == '2':
 
-                topics = ["theoretical physics", "linguistics", "current events", "automation", "capitalism vs socialism", "the ideas of Nietszche"]
+                topics = ["theoretical physics", "linguistics", "current events", "automation", "capitalism vs socialism", "the ideas of Nietszche", 
+                          "best approach to make LLMs more efficient", "the poems of Pablo Neruda", "transformer architecture", "Chicago school of economics", "the Chinese century", 
+                          "the works of F. Scott Fitzgerald", "themes of Love and War in the Iliad and the Odyssey", "cultural affects of questionable translation in the King James Bible",
+                          "investment strategies", "foreign affairs", "cancel culture", "abortion rights", "gun control", "limits of free speech", "ancient astronomy", "Romantic period composers", 
+                          "investment banking", "financial literacy", "merits of Freudian psychoanalysis", "germ theory", "Henri Matisse", "causes of World War One", "the Trail of Tears", "Organized Labor"]
                 uri = "https://us-central1-parsellm.cloudfunctions.net/gemini-proxy"
                 geminichatcloud = GeminiChatCloud(uri)
-                filename = geminichatcloud.automated_chat_loop(topics)
+                filename = geminichatcloud.automated_chat_loop_roles(topics)
                 return filename
+
+            return None
 
         
         #updated to search for both txt and csv: 
@@ -252,11 +258,12 @@ class AppManager:
                 print("0. Exit")
                 print("1. LLM Rawtext")
                 print("2. Prompts Rawtext")
+                print("3. File is fully LLM generated, load whole file")
                 if filename == 'master_corpus.csv':
-                    print("3. Live Chat Rawtext")
-                    print("4. Generated Chat Rawtext")
-                    print("5. Specific Tag")
-                    print("6. Specific Chat #")
+                    print("4. Live Chat Rawtext")
+                    print("5. Generated Chat Rawtext")
+                    print("6. Specific Tag")
+                    print("7. Specific Chat #")
                 selection = input("Select an option...")
 
                 if selection == '0':
@@ -268,19 +275,25 @@ class AppManager:
                     rawtext = '. '.join(list(df[df["Role"]=="User"]["Content"]))
                     break 
                 elif selection == '3':
-                    rawtext = '. '.join(list(df[df["Live?"]==1]["Content"]))
+                    rawtext = ' '.join(df["Content"].astype(str))
+                    if rawtext == "":
+                        print("rawtext failed to load from file at line 278 of AppManager")
+                        return
                     break
                 elif selection == '4':
-                    rawtext = '. '.join(list(df[df["Live?"]==0]["Content"]))
+                    rawtext = '. '.join(list(df[df["Live?"]==1]["Content"]))
                     break
                 elif selection == '5':
+                    rawtext = '. '.join(list(df[df["Live?"]==0]["Content"]))
+                    break
+                elif selection == '6':
                     tag_choice = input("Which tag?")
                     rawtext = '. '.join(list(df[df["Tag"]==tag_choice]["Content"]))
                     if len(rawtext) < 3:
                         print("No tags found")
                         continue
                     break
-                elif selection == '6':
+                elif selection == '7':
                     chat_choice = input("Which chat?")
                     rawtext = '. '.join(list(df[df["Chat"]==int(chat_choice)]["Content"]))
                     if len(rawtext) < 3:
@@ -290,7 +303,7 @@ class AppManager:
                 else:
                     print("invalid input, please enter a number from the list: ")
         else:
-        #rawtext from .txt, udated encodings to handle older files not encoded with 'utf-8':
+        #rawtext from .txt, updated encodings to handle older files not encoded with 'utf-8':
             encodings = [('utf-8', 'replace'), ('cp1254', 'replace'), ('latin-1', 'strict')]
             
             for encoding, error in encodings:
@@ -309,7 +322,31 @@ class AppManager:
         pos_tag_tokens = corpus[0]
         lemmas = corpus[1]
         tokens = corpus[2]
+        tagged_tokens_formatted = [f"{token}[{tag}]" for token, tag in pos_tag_tokens]
         sentences = corpus[3]
+
+        if len(pos_tag_tokens) == 0:
+            print("Failed to load POS tagged tokens")
+            return
+        if len(lemmas) == 0:
+            print("Failed to load lemmas")
+            return
+        if len(tokens) == 0:
+            print("Failed to load tokens")
+            return
+        if len(sentences) == 0:
+            print("Failed to load sentences")
+            return
+
+        #if not 'master' in filename:
+        #   annotated_csv_metadata = encorporator_a.append_annotated(tagged_tokens_formatted, lemmas, sentences)
+        #    print(f"\nannotated chat saved to {annotated_csv_metadata} ")
+
+        annotated_csv_master = encorporator_a.write_annotated_csv(sentences, "master_annotated_corpus.csv")
+
+        print("annotated transcript appended to master")
+
+
         print(f"\nWhat would you like to do with <{filename}>?  ")
 
         #here is the main analysis 'function' of the program:
