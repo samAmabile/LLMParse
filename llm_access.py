@@ -339,7 +339,14 @@ class GeminiChatCloud:
         payload = {"prompt": prompt}
 
         if role:
-            payload["role_instruction"] = f"you are a {role}, stay in character"
+            payload["role_instruction"] = (
+                f"you are a {role}, stay in character.",
+                f"ALWAYS stay in character as a {role}.", 
+                f"NEVER mention you are an AI.", 
+                f"NEVER be a 'helpful assistant.", 
+                f"Be opinionated and stay true to the {role} persona."
+            )
+
         
         if history:
             formatted_history = []
@@ -546,7 +553,7 @@ class GeminiChatCloud:
 
         return filename
     
-    def automated_chat_loop_roles(self, topics, bot_a="stubborn proponent", bot_b="taciturn opponent", turns=6):
+    def automated_chat_loop_roles(self, topics, bot_a="pessimist", bot_b="optimist", turns=6):
         topic = random.choice(topics)
         prompt = f"We are discussing {topic}. {bot_a}, please start."
 

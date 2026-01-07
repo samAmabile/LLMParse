@@ -442,7 +442,7 @@ class Encorporator:
         if not append:
             columns = [["Index", "Sentence", "POS Tagged Tokens", "Lemmas"]]
 
-        start_index = self.get_last_index(filename)
+        start_index = self.get_last_index(filename)+1
         j=0
 
         for i, sentence in enumerate(sentences, start=start_index):
